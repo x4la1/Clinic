@@ -1,0 +1,56 @@
+# ===================================
+# === Symfony / PHP Backend ===
+# ===================================
+
+# Каталог с зависимостями Composer
+/vendor/
+
+# Кэш и логи Symfony
+/var/cache/*
+/var/log/*
+# Эти файлы нужны, чтобы git отслеживал пустые папки
+!/var/cache/.gitkeep
+!/var/log/.gitkeep
+
+# Файлы окружения. .env может быть шаблоном,
+# а локальные переопределения (.env.local) должны быть исключены
+.env.local
+.env.*.local
+
+# Скомпилированные ассеты (если вы их храните в public/bundles)
+/public/bundles/
+
+# Конфигурация для PHPUnit (если вы не хотите коммитить локальную)
+/phpunit.xml
+
+# ===================================
+# === Frontend (Vite / React / TS) ===
+# ===================================
+
+/frontend/node_modules/
+
+/frontend/dist/
+/frontend/build/
+
+
+/frontend/.env.local
+/frontend/.env.*.local
+/frontend/.vite/
+
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+
+
+# Настройки редакторов кода
+.idea/
+*.swp
+*.swo
+*~
+
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Локальные переопределения для Docker Compose (если есть)
+# docker-compose.override.yml
