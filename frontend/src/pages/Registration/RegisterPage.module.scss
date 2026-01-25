@@ -1,0 +1,31 @@
+.container {
+  min-height: 100vh;
+  padding: 20px;
+  background: #f0f2f5;
+}
+
+.card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.footer {
+  margin-top: 24px;
+  text-align: center;
+  color: #666;
+  
+  a {
+    color: #1890ff;
+    font-weight: 500;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

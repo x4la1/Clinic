@@ -1,0 +1,19 @@
+.container {
+  padding: 24px;
+  min-height: 100svh;
+  background-color: #f5f7fa;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100svh;
+  background-color: #f5f7fa;
+}
+
+.title {
+  font-size: 28px;
+  color: #1890ff;
+  margin: 0;
+}

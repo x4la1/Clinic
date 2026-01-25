@@ -1,0 +1,33 @@
+.container {
+  padding: 24px;
+  min-height: 100svh;
+  background-color: #f5f7fa;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100svh;
+  background-color: #f5f7fa;
+}
+
+.title {
+  font-size: 24px;
+  color: #1890ff;
+  margin-bottom: 24px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  th {
+    background-color: #fafafa;
+    font-weight: 600;
+  }
+}

@@ -1,0 +1,164 @@
+.container {
+  padding: 20px;
+  min-height: 100svh;
+  background-color: #f5f7fa;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100svh;
+}
+
+.notFound {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #ff4d4f;
+}
+
+.backButton {
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+.clinicCard {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 32px;
+}
+
+.clinicName {
+  margin-bottom: 16px;
+  color: #1890ff;
+}
+
+.clinicInfo {
+  margin-bottom: 24px;
+}
+
+.infoRow {
+  display: flex;
+  margin-bottom: 8px;
+
+  strong {
+    width: 100px;
+    color: #595959;
+  }
+}
+
+.bookButton {
+  margin-top: 16px;
+}
+
+.doctorsSection,
+.reviewsSection {
+  margin-top: 32px;
+}
+
+.doctorLink {
+  text-decoration: none;
+  color: inherit;
+}
+
+.doctorCard {
+  height: 100%;
+  border-radius: 8px;
+  transition: box-shadow 0.3s;
+  padding: 16px;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .doctorName {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .doctorExperience {
+    color: #8c8c8c;
+    font-size: 14px;
+  }
+}
+
+.reviewItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .reviewText {
+    flex: 1;
+    margin-right: 20px;
+    color: #595959;
+    line-height: 1.5;
+  }
+
+  .reviewAuthor {
+    color: #8c8c8c;
+    font-size: 12px;
+    text-align: right;
+    min-width: 120px;
+  }
+}
+
+.doctorCard {
+  height: 100%;
+  border-radius: 8px;
+  transition: box-shadow 0.3s;
+  padding: 16px; 
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .doctorName {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .doctorExperience {
+    color: #8c8c8c;
+    font-size: 14px;
+    display: block;
+  }
+}
+
+.reviewItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .reviewText {
+    flex: 1;
+    margin-right: 20px;
+    color: #595959;
+    line-height: 1.5;
+    word-wrap: break-word; 
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  .reviewAuthor {
+    color: #8c8c8c;
+    font-size: 12px;
+    text-align: right;
+    min-width: 120px;
+  }
+}
