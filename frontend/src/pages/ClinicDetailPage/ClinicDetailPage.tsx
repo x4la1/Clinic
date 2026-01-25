@@ -49,9 +49,9 @@ export const ClinicDetailPage: React.FC = () => {
                 reviewsResponse,
                 usersResponse
             ] = await Promise.all([
-                apiRequest<Staff[]>('/api/staffs'),
-                apiRequest<{ reviews: Review[] }>('/api/reviews/all'),
-                apiRequest<{ users: User[] }>('/api/users')
+                apiRequest<Staff[]>('/api/staffs'),//ok
+                apiRequest<{ reviews: Review[] }>('/api/reviews/all'), //ne ok
+                apiRequest<{ users: User[] }>('/api/users') //ok
             ]);
 
             const clinicDoctors = staffResponse.filter(s => s.clinic?.id === clinicId);
@@ -79,7 +79,7 @@ export const ClinicDetailPage: React.FC = () => {
         if (!user || !clinic) return;
 
         try {
-            await apiRequest('/api/review/create', {
+            await apiRequest('/api/review/create', { //ok
                 method: 'POST',
                 body: JSON.stringify({
                     user_id: user.id,

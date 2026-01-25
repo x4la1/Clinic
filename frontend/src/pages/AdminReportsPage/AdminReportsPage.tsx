@@ -33,15 +33,15 @@ export const AdminReportsPage: React.FC = () => {
         staffResponse,
         appointmentsResponse
       ] = await Promise.all([
-        apiRequest<{ users: User[] }>('/api/users'),
-        apiRequest<Staff[]>('/api/staffs'),
-        apiRequest<{ appointments: Appointment[] }>('/api/appointments/all')
+        apiRequest<{ users: User[] }>('/api/users'), //ok
+        apiRequest<Staff[]>('/api/staffs'), //ok
+        apiRequest<{ appointments: Appointment[] }>('/api/appointments/all')//ne ok
       ]);
 
       setUsers(usersResponse.users);
       setStaff(staffResponse);
       setAppointments(appointmentsResponse.appointments || []);
-      
+
     } catch (error: any) {
       console.error('Failed to load report data', error);
     } finally {
@@ -59,10 +59,10 @@ export const AdminReportsPage: React.FC = () => {
   };
 
   const totalPatients = users.filter(u => u.roleId === ROLE_IDS.PATIENT).length;
-  const totalDoctors = staff.length; 
+  const totalDoctors = staff.length;
   const totalClinics = clinics.length;
   const totalAppointments = appointments.length;
-  
+
   const confirmedAppointments = appointments.filter(a => a.status?.name === 'COMPLETED').length;
   const cancelledAppointments = appointments.filter(a => a.status?.name === 'CANCELED').length;
   const pendingAppointments = appointments.filter(a => a.status?.name === 'SCHEDULED').length;
@@ -78,7 +78,7 @@ export const AdminReportsPage: React.FC = () => {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Отчёты</h1>
-      
+
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} md={6}>
           <Card>
@@ -143,7 +143,7 @@ export const AdminReportsPage: React.FC = () => {
                 const doctorApps = appointments.filter(a => a.staff?.id === doctor.id);
                 const completed = doctorApps.filter(a => a.status?.name === 'COMPLETED').length;
                 const cancelled = doctorApps.filter(a => a.status?.name === 'CANCELED').length;
-                
+
                 return (
                   <tr key={doctor.id}>
                     <td>{doctor.lastName} {doctor.firstName.charAt(0)}.</td>

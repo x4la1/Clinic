@@ -37,9 +37,9 @@ export const PatientAppointmentsPage: React.FC = () => {
         staffResponse,
         clinicsResponse
       ] = await Promise.all([
-        apiRequest<{ appointments: Appointment[] }>(`/api/user/appointments/${user!.id}`),
-        apiRequest<Staff[]>('/api/staffs'),
-        apiRequest<{ clinics: Clinic[] }>('/api/clinics/all')
+        apiRequest<{ appointments: Appointment[] }>(`/api/user/appointments/${user!.id}`), //neok
+        apiRequest<Staff[]>('/api/staffs'), //ok
+        apiRequest<{ clinics: Clinic[] }>('/api/clinics/all')//ok
       ]);
 
       setAppointments(appointmentsResponse.appointments || []);
@@ -64,7 +64,7 @@ export const PatientAppointmentsPage: React.FC = () => {
       cancelText: 'Нет',
       onOk: async () => {
         try {
-          await apiRequest('/api/appointment/cancel', {
+          await apiRequest('/api/appointment/cancel', { //ne ok
             method: 'POST',
             body: JSON.stringify({ id: record.id }),
           });

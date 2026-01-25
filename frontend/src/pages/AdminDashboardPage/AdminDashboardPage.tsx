@@ -72,13 +72,13 @@ export const AdminDashboardPage: React.FC = () => {
         specializationsResponse,
         servicesResponse
       ] = await Promise.all([
-        apiRequest<{ users: User[] }>('/api/users'),
-        apiRequest<Staff[]>('/api/staffs'),
-        apiRequest<{ appointments: Appointment[] }>('/api/appointments/all'),
-        apiRequest<{ clinics: Clinic[] }>('/api/clinics/all'),
-        apiRequest<{ cabinets: Cabinet[] }>('/api/cabinets/all'),
-        apiRequest<Specialization[]>('/api/specializations'),
-        apiRequest<Service[]>('/api/services')
+        apiRequest<{ users: User[] }>('/api/users'), //ok
+        apiRequest<Staff[]>('/api/staffs'), //ok
+        apiRequest<{ appointments: Appointment[] }>('/api/appointments/all'), //ne ok
+        apiRequest<{ clinics: Clinic[] }>('/api/clinics/all'), //ok
+        apiRequest<{ cabinets: Cabinet[] }>('/api/cabinets/all'), //ne ok
+        apiRequest<Specialization[]>('/api/specializations'), //ok
+        apiRequest<Service[]>('/api/services') //ok
       ]);
 
       setUsers(usersResponse.users);
@@ -127,7 +127,7 @@ export const AdminDashboardPage: React.FC = () => {
 
   const handleSaveResult = async (values: any) => {
     try {
-      await apiRequest('/api/appointment/update', {
+      await apiRequest('/api/appointment/update', { //
         method: 'POST',
         body: JSON.stringify({
           id: currentAppointment!.id,
@@ -149,7 +149,7 @@ export const AdminDashboardPage: React.FC = () => {
 
   const handleAddClinic = async (values: any) => {
     try {
-      await apiRequest('/api/clinic/create', {
+      await apiRequest('/api/clinic/create', { //ok
         method: 'POST',
         body: JSON.stringify({
           name: values.name,
@@ -183,7 +183,7 @@ export const AdminDashboardPage: React.FC = () => {
       let staffId: number;
 
       if (editingStaff) {
-        await apiRequest('/api/staff/update', {
+        await apiRequest('/api/staff/update', { //ok
           method: 'POST',
           body: JSON.stringify({
             ...staffData,
@@ -192,7 +192,7 @@ export const AdminDashboardPage: React.FC = () => {
         });
         staffId = editingStaff.id;
       } else {
-        const response = await apiRequest<{ id: number }>('/api/staff/create', {
+        const response = await apiRequest<{ id: number }>('/api/staff/create', { //ok
           method: 'POST',
           body: JSON.stringify(staffData),
         });
@@ -200,7 +200,7 @@ export const AdminDashboardPage: React.FC = () => {
       }
 
       if (values.specializations && values.specializations.length > 0) {
-        await apiRequest('/api/staff/specializations/update', {
+        await apiRequest('/api/staff/specializations/update', { //ok
           method: 'POST',
           body: JSON.stringify({
             id: staffId,
@@ -210,7 +210,7 @@ export const AdminDashboardPage: React.FC = () => {
       }
 
       if (values.services && values.services.length > 0) {
-        await apiRequest('/api/staff/services/update', {
+        await apiRequest('/api/staff/services/update', { //ok
           method: 'POST',
           body: JSON.stringify({
             id: staffId,
@@ -239,7 +239,7 @@ export const AdminDashboardPage: React.FC = () => {
       cancelText: 'Нет',
       onOk: async () => {
         try {
-          await apiRequest('/api/staff/delete', {
+          await apiRequest('/api/staff/delete', {//ok
             method: 'POST',
             body: JSON.stringify({ id: record.id }),
           });
@@ -255,7 +255,7 @@ export const AdminDashboardPage: React.FC = () => {
   const handleAddTimeSlot = async (values: any) => {
     try {
       const slots = values.slots || [];
-      await apiRequest('/api/timeslots/create', {
+      await apiRequest('/api/timeslots/create', {//hz
         method: 'POST',
         body: JSON.stringify({
           staff_id: values.staffId,
@@ -280,7 +280,7 @@ export const AdminDashboardPage: React.FC = () => {
       cancelText: 'Нет',
       onOk: async () => {
         try {
-          await apiRequest('/api/timeslot/delete', {
+          await apiRequest('/api/timeslot/delete', { //hz
             method: 'POST',
             body: JSON.stringify({ id: record.id }),
           });
@@ -295,7 +295,7 @@ export const AdminDashboardPage: React.FC = () => {
 
   const handleAddCabinet = async (values: any) => {
     try {
-      await apiRequest('/api/cabinet/create', {
+      await apiRequest('/api/cabinet/create', { //ok
         method: 'POST',
         body: JSON.stringify({
           id: values.clinicId,
@@ -321,7 +321,7 @@ export const AdminDashboardPage: React.FC = () => {
       cancelText: 'Нет',
       onOk: async () => {
         try {
-          await apiRequest('/api/cabinet/delete', {
+          await apiRequest('/api/cabinet/delete', {//ok
             method: 'POST',
             body: JSON.stringify({ id: record.id }),
           });
@@ -343,7 +343,7 @@ export const AdminDashboardPage: React.FC = () => {
       cancelText: 'Нет',
       onOk: async () => {
         try {
-          await apiRequest('/api/appointment/cancel', {
+          await apiRequest('/api/appointment/cancel', { //ne ok
             method: 'POST',
             body: JSON.stringify({ id: record.id }),
           });
@@ -357,7 +357,7 @@ export const AdminDashboardPage: React.FC = () => {
   };
   const handleCreateService = async (values: any) => {
     try {
-      await apiRequest('/api/service/create', {
+      await apiRequest('/api/service/create', { //ok
         method: 'POST',
         body: JSON.stringify({ name: values.name }),
       });
@@ -379,7 +379,7 @@ export const AdminDashboardPage: React.FC = () => {
       cancelText: 'Нет',
       onOk: async () => {
         try {
-          await apiRequest('/api/service/delete', {
+          await apiRequest('/api/service/delete', { //ok
             method: 'POST',
             body: JSON.stringify({ id: service.id }),
           });
@@ -394,7 +394,7 @@ export const AdminDashboardPage: React.FC = () => {
 
   const handleCreateSpecialization = async (values: any) => {
     try {
-      await apiRequest('/api/service/specialization/create', {
+      await apiRequest('/api/specialization/create', { //ok
         method: 'POST',
         body: JSON.stringify({ name: values.name }),
       });
@@ -416,7 +416,7 @@ export const AdminDashboardPage: React.FC = () => {
       cancelText: 'Нет',
       onOk: async () => {
         try {
-          await apiRequest('/api/service/specialization/delete', {
+          await apiRequest('/api/specialization/delete', { //ok
             method: 'POST',
             body: JSON.stringify({ id: spec.id }),
           });
@@ -438,7 +438,7 @@ export const AdminDashboardPage: React.FC = () => {
       cancelText: 'Нет',
       onOk: async () => {
         try {
-          await apiRequest('/api/clinic/delete', {
+          await apiRequest('/api/clinic/delete', { //ok
             method: 'POST',
             body: JSON.stringify({ id: record.id }),
           });

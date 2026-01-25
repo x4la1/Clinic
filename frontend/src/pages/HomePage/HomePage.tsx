@@ -17,7 +17,7 @@ export const HomePage: React.FC = () => {
     try {
       setLoading(true);
 
-      const response = await apiRequest<{ clinics: Clinic[] }>('/api/clinics/all');
+      const response = await apiRequest<{ clinics: Clinic[] }>('/api/clinics/all'); //ok
       setClinics(response.clinics || []);
 
     } catch (e) {

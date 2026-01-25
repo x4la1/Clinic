@@ -38,7 +38,7 @@ export const LoginPage: React.FC = () => {
 
     try {
       const response = await apiRequest<{ user_id: number; user_role: number }>(
-        '/api/user/login',
+        '/api/user/login', //ok
         {
           method: 'POST',
           body: JSON.stringify({
@@ -54,7 +54,7 @@ export const LoginPage: React.FC = () => {
         firstname: string;
         lastname: string;
         patronymic: string;
-      }>(`/api/user/${response.user_id}`);
+      }>(`/api/user/${response.user_id}`); //ok
       const user: User = {
         id: response.user_id,
         login: userResponse.login,

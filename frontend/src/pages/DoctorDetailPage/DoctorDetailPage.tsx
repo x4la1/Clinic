@@ -33,7 +33,7 @@ export const DoctorDetailPage: React.FC = () => {
 
             const doctorId = Number(id);
 
-            const staffResponse = await apiRequest<Staff[]>(`/api/staffs`);
+            const staffResponse = await apiRequest<Staff[]>(`/api/staffs`); //ok
             const foundDoctor = staffResponse.find(s => s.id === doctorId);
 
             if (!foundDoctor) {

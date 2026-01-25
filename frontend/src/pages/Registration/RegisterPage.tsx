@@ -26,7 +26,7 @@ export const RegisterPage: React.FC = () => {
 
     try {
       const response = await apiRequest<{ user_id: number; user_role: number }>(
-        '/api/user/register',
+        '/api/user/register', //ok
         {
           method: 'POST',
           body: JSON.stringify({

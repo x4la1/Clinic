@@ -47,9 +47,9 @@ export const BookAppointmentPage: React.FC = () => {
         staffResponse,
         servicesResponse
       ] = await Promise.all([
-        apiRequest<{ clinics: Clinic[] }>('/api/clinics/all'),
-        apiRequest<Staff[]>('/api/staffs'),
-        apiRequest<Service[]>('/api/services')
+        apiRequest<{ clinics: Clinic[] }>('/api/clinics/all'), //ok
+        apiRequest<Staff[]>('/api/staffs'), //ok
+        apiRequest<Service[]>('/api/services') //ok
       ]);
 
       setClinics(clinicsResponse.clinics || []);
@@ -74,8 +74,8 @@ export const BookAppointmentPage: React.FC = () => {
   }, [preselectedClinicId, preselectedDoctorId, staff]);
 
   const availableDoctors = clinicId ? staff.filter(s => s.clinic?.id === clinicId) : [];
-  
-  const doctorServices = doctorId 
+
+  const doctorServices = doctorId
     ? staff.find(s => s.id === doctorId)?.services || []
     : [];
 
@@ -89,13 +89,13 @@ export const BookAppointmentPage: React.FC = () => {
 
   try {
     setLoading(true);
-    
+
     const dateTimeStr = selectedDate.format('YYYY-MM-DD') + ' ' + timeSlot + ':00';
-    
+
     await createAppointment({
       user_id: user!.id,
       staff_id: doctorId,
-      status_id: 1, 
+      status_id: 1,
       service_id: serviceId,
       date: dateTimeStr
     });

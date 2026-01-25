@@ -1,5 +1,5 @@
 services:
-    mysql:
+    database:
         image: 'mysql:8.0'
         working_dir: /application
         volumes:
@@ -20,6 +20,8 @@ services:
             - './docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf'
         ports:
             - '7777:80'
+        depends_on:
+            -   database
 
     php-fpm:
         build: docker/php-fpm
@@ -28,3 +30,22 @@ services:
             - '.:/application'
             - './docker/php-fpm/php-ini-overrides.ini:/etc/php/8.4/fpm/conf.d/99-overrides.ini'
             - './docker/php-fpm/php-ini-overrides.ini:/etc/php/8.4/cli/conf.d/99-overrides.ini'
+        depends_on:
+            - database
+    frontend:
+        image: node:20-alpine
+        working_dir: /application/app
+        volumes:
+            - './frontend:/application/app'
+            - node_modules_volume:/application/app/node_modules
+        ports:
+            - '7778:5173'
+        command:  sh -c "npm install && npm run dev -- --host 0.0.0.0"
+        environment:
+            - CHOKIDAR_USEPOLLING=true
+
+volumes:
+    mysql_data:
+        driver: local
+    node_modules_volume:
+        driver: local

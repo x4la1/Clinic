@@ -36,8 +36,8 @@ export const AdminReviewsPage: React.FC = () => {
                 reviewsResponse,
                 usersResponse
             ] = await Promise.all([
-                apiRequest<{ reviews: Review[] }>('/api/reviews/all'),
-                apiRequest<{ users: User[] }>('/api/users')
+                apiRequest<{ reviews: Review[] }>('/api/reviews/all'), //ne ok
+                apiRequest<{ users: User[] }>('/api/users') // ok
             ]);
 
             setReviews(reviewsResponse.reviews || []);
@@ -51,7 +51,7 @@ export const AdminReviewsPage: React.FC = () => {
 
     const handleApprove = async (id: number) => {
         try {
-            await apiRequest('/api/review/approve', {
+            await apiRequest('/api/review/approve', { //hz
                 method: 'POST',
                 body: JSON.stringify({ id })
             });
@@ -71,7 +71,7 @@ export const AdminReviewsPage: React.FC = () => {
             cancelText: 'Нет',
             onOk: async () => {
                 try {
-                    await apiRequest('/api/review/delete', {
+                    await apiRequest('/api/review/delete', { //ok
                         method: 'POST',
                         body: JSON.stringify({ id })
                     });

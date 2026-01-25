@@ -30,8 +30,8 @@ export const DoctorsSearchPage: React.FC = () => {
                 staffResponse,
                 clinicsResponse
             ] = await Promise.all([
-                apiRequest<Staff[]>('/api/staffs'),
-                apiRequest<{ clinics: Clinic[] }>('/api/clinics/all')
+                apiRequest<Staff[]>('/api/staffs'), //ok
+                apiRequest<{ clinics: Clinic[] }>('/api/clinics/all') //ok
             ]);
 
             setDoctors(staffResponse);
