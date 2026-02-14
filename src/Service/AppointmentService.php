@@ -125,4 +125,31 @@ class AppointmentService
 
         return $result;
     }
+
+    public function getAllAppointments(): array
+    {
+        $appointments = $this->appointmentRepository->findAll();
+        $result = [];
+        foreach ($appointments as $appointment) {
+            $result[] = [
+                'id' => $appointment->getId(),
+                'date' => $appointment->getDate()->format('Y-m-d H:i'),
+                'result' => $appointment->getResult(),
+                'status' => $appointment->getStatus(),
+                'staff' => [
+                    'id' => $appointment->getStaff()->getId(),
+                    'firstName' => $appointment->getStaff()->getFirstName(),
+                    'lastName' => $appointment->getStaff()->getLastName(),
+                    'patronymic' => $appointment->getStaff()->getPatronymic(),
+                ],
+                'service' => [
+                    'id' => $appointment->getService()->getId(),
+                    'name' => $appointment->getService()->getName(),
+                ]
+            ];
+        }
+
+        return $result;
+    }
+
 }

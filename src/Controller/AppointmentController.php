@@ -12,10 +12,16 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class AppointmentController extends AbstractController
 {
-    #[Route('/appointments/all', name: 'appointment', methods: ['GET'])] //TODO
-    public function index(): JsonResponse
+    #[Route('/appointments/all', name: 'get_all_appointments', methods: ['GET'])]
+    public function getAllAppointments(Request $request, AppointmentService $appointmentService): JsonResponse
     {
-        return new JsonResponse(null, Response::HTTP_OK);
+        try {
+            $appointments = $appointmentService->getAllAppointments();
+            return new JsonResponse(['appointments' => $appointments], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+
     }
 
     #[Route('/appointment/create', name: 'create_appointment', methods: ['POST'])]

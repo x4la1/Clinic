@@ -74,7 +74,7 @@ export const AdminDashboardPage: React.FC = () => {
       ] = await Promise.all([
         apiRequest<{ users: User[] }>('/api/users'), //ok
         apiRequest<Staff[]>('/api/staffs'), //ok
-        apiRequest<{ appointments: Appointment[] }>('/api/appointments/all'), //ne ok
+        apiRequest<{ appointments: Appointment[] }>('/api/appointments/all'), //ok
         apiRequest<{ clinics: Clinic[] }>('/api/clinics/all'), //ok
         apiRequest<{ cabinets: Cabinet[] }>('/api/cabinets/all'), //ok
         apiRequest<Specialization[]>('/api/specializations'), //ok
