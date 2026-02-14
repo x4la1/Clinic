@@ -76,7 +76,7 @@ export const AdminDashboardPage: React.FC = () => {
         apiRequest<Staff[]>('/api/staffs'), //ok
         apiRequest<{ appointments: Appointment[] }>('/api/appointments/all'), //ne ok
         apiRequest<{ clinics: Clinic[] }>('/api/clinics/all'), //ok
-        apiRequest<{ cabinets: Cabinet[] }>('/api/cabinets/all'), //ne ok
+        apiRequest<{ cabinets: Cabinet[] }>('/api/cabinets/all'), //ok
         apiRequest<Specialization[]>('/api/specializations'), //ok
         apiRequest<Service[]>('/api/services') //ok
       ]);
@@ -127,7 +127,7 @@ export const AdminDashboardPage: React.FC = () => {
 
   const handleSaveResult = async (values: any) => {
     try {
-      await apiRequest('/api/appointment/update', { //
+      await apiRequest('/api/appointment/result/update', { //ок
         method: 'POST',
         body: JSON.stringify({
           id: currentAppointment!.id,
@@ -233,7 +233,7 @@ export const AdminDashboardPage: React.FC = () => {
   const handleDeleteStaff = (record: Staff) => {
     Modal.confirm({
       title: 'Удалить сотрудника?',
-      content: `Вы уверены, что хотите удалить ${record.lastName} ${record.firstName}?`,
+      content: `Вы уверены, что хотите удалить ${record.lastname} ${record.firstname}?`,
       okText: 'Да',
       okType: 'danger',
       cancelText: 'Нет',
@@ -561,7 +561,7 @@ export const AdminDashboardPage: React.FC = () => {
     {
       title: 'ФИО',
       render: (_: any, record: Staff) =>
-        `${record.lastName} ${record.firstName} ${record.patronymic || ''}`.trim(),
+        `${record.lastname} ${record.firstname} ${record.patronymic || ''}`.trim(),
     },
     {
       title: 'Специализации',
@@ -633,7 +633,7 @@ export const AdminDashboardPage: React.FC = () => {
       title: 'Врач',
       render: (_: any, record: TimeSlot) => {
         const doctor = staff.find(s => s.id === record.staffId);
-        return doctor ? `${doctor.lastName} ${doctor.firstName}` : `ID: ${record.staffId}`;
+        return doctor ? `${doctor.lastname} ${doctor.firstname}` : `ID: ${record.staffId}`;
       }
     },
     {
@@ -801,7 +801,7 @@ export const AdminDashboardPage: React.FC = () => {
                   >
                     {staff.map(doctor => (
                       <Option key={doctor.id} value={doctor.id}>
-                        {doctor.lastName} {doctor.firstName}
+                        {doctor.lastname} {doctor.firstname}
                       </Option>
                     ))}
                   </Select>
@@ -1089,7 +1089,7 @@ export const AdminDashboardPage: React.FC = () => {
             <Select placeholder="Выберите врача">
               {staff.map(doctor => (
                 <Option key={doctor.id} value={doctor.id}>
-                  {doctor.lastName} {doctor.firstName}
+                  {doctor.lastname} {doctor.firstname}
                 </Option>
               ))}
             </Select>

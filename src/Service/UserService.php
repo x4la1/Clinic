@@ -34,7 +34,7 @@ class UserService
                 'lastName' => $user->getLastName(),
                 'patronymic' => $user->getPatronymic(),
                 'phone' => $user->getPhone(),
-                // добавьте другие поля
+                'roleId' => $user->getRole()->getId(),
             ];
         }
 
@@ -134,7 +134,7 @@ class UserService
             'firstname' => $user->getFirstname(),
             'lastname' => $user->getLastname(),
             'patronymic' => $user->getPatronymic(),
-            'role' => $user->getRole()->getRoleName(),
+            'role' => $user->getRole()->getId(),
         ];
     }
 

@@ -109,7 +109,7 @@ class ClinicService
                 'address' => $clinic->getAddress(),
                 'phone' => $clinic->getPhone(),
                 'email' => $clinic->getEmail(),
-                'image_path' => $clinic->getImagePath()
+                'imagePath' => $clinic->getImagePath()
             ];
         }
 

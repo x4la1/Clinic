@@ -48,44 +48,16 @@ class ReviewController extends AbstractController
     }
 
 
-    #[Route('/appointments/all', name: 'review_all', methods: ['GET'])]
+    #[Route('/reviews/all', name: 'review_all', methods: ['GET'])]
     public function getAllReviews(ReviewService $reviewService, Request $request): JsonResponse
     {
         try{
-            $reviews = $reviewService->
-        }
-
-    }
-
-    #[Route('/clinic/review', name: 'review_clinic', methods: ['POST'])]
-    public function findReviewByClinicId(ReviewService $reviewService, Request $request): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-        $id = $data['id'] ?? null;
-        if (!$id) {
-            return new JsonResponse(['error' => 'INVALID_REVIEW_DATA'], Response::HTTP_BAD_REQUEST);
-        }
-
-        try {
-            $result = $reviewService->findReviewsByClinicId($id);
-            return new JsonResponse($result, Response::HTTP_OK);
-        } catch (\Exception $e) {
+            $reviews = $reviewService->getAllReviews();
+            return new JsonResponse(['reviews' => $reviews], Response::HTTP_OK);
+        }catch (\Exception $e)
+        {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
 
     }
-
-    private function validateReview(array $data): bool
-    {
-        $id = $data["id"] ?? null;
-        $clinicId = $data["clinic_id"] ?? null;
-        $description = $data["description"] ?? null;
-
-        if (empty(trim($id)) || empty(trim($clinicId)) || empty(trim($description))) {
-            return false;
-        }
-
-        return true;
-    }
-
 }

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Staff;
 use App\Service\StaffManagerService;
+use App\Service\StaffTimeSlotService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -123,6 +124,25 @@ class StaffController extends AbstractController
             return new JsonResponse(null, Response::HTTP_OK);
         } catch (\Exception $exception) {
             return new JsonResponse(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    #[Route('/staff/timeslots/update', name: 'update_time_slots', methods: ['POST'])]
+    public function updateStaffTimeSlots(StaffTimeSlotService $staffTimeSlotService, Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $staffId = $data["staff_id"] ?? null;
+        $timeSlots = $data["timeslots_ids"] ?? null;
+
+        if (!is_array($timeSlots)) {
+            return new JsonResponse(['error' => "INVALID_DATA"], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $staffTimeSlotService->updateStaffTimeSlot($staffId, $timeSlots);
+            return new JsonResponse(null, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
     }
 

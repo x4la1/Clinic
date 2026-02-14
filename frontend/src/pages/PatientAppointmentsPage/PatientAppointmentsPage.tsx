@@ -20,7 +20,7 @@ export const PatientAppointmentsPage: React.FC = () => {
   const [clinics, setClinics] = useState<Clinic[]>([]);
 
   useEffect(() => {
-    if (!user || user.roleId !== ROLE_IDS.PATIENT) {
+    if (!user || user.roleId !== 1) { //ТУТ
       navigate('/');
       return;
     }
@@ -80,7 +80,7 @@ export const PatientAppointmentsPage: React.FC = () => {
 
   const getDoctorName = (staffId: number) => {
     const doctor = staff.find(s => s.id === staffId);
-    return doctor ? `${doctor.lastName} ${doctor.firstName} ${doctor.patronymic || ''}` : `ID: ${staffId}`;
+    return doctor ? `${doctor.lastname} ${doctor.firstname} ${doctor.patronymic || ''}` : `ID: ${staffId}`;
   };
 
   const getClinicName = (clinicId: number) => {

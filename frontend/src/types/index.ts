@@ -12,7 +12,7 @@ export interface User {
 
 export interface Role {
   id: number;
-  name: UserRole;      
+  name: UserRole;
 }
 
 export interface Clinic {
@@ -47,7 +47,7 @@ export interface Staff {
   lastName: string;
   patronymic: string;
   phone: string;
-  experience: string; 
+  experience: string;
   experienceYears: number;
   clinic: Clinic;
   cabinet: Cabinet | null;
@@ -62,12 +62,12 @@ export interface Service {
 
 export interface AppointmentStatus {
   id: number;
-  name: string;         
+  name: string;
 }
 
 export interface Appointment {
   id: number;
-  date: string; 
+  date: string;
   result: string;
   status: AppointmentStatus;
   staff: {
@@ -84,14 +84,14 @@ export interface Appointment {
 
 export interface TimeSlot {
   id: number;
-  staffId: number;    
-  slot: string;      
+  staffId: number;
+  slot: string;
 }
 
 export interface Review {
   id: number;
-  userId: number;       
-  clinicId: number;     
+  userId: number;
+  clinicId: number;
   description: string;
   status: 'new' | 'approved' | 'rejected';
 }

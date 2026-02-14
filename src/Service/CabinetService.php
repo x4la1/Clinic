@@ -29,7 +29,7 @@ class CabinetService
             throw new BadRequestHttpException("CLINIC_NOT_FOUND");
         }
 
-        if ($this->cabinetRepository->findOneBy(['number' => $number])) {
+        if ($this->cabinetRepository->findOneBy(['number' => $number, 'clinic' => $clinic])) {
             throw new BadRequestHttpException("NUMBER_ALREADY_EXISTS");
         }
 
@@ -60,6 +60,22 @@ class CabinetService
                 'cabinets' => $result
             ];
 
+    }
+
+    public function getAllCabinets(): array
+    {
+        $cabinets = $this->cabinetRepository->findAll();
+        $result = [];
+        foreach ($cabinets as $cabinet) {
+            $result[] = [
+                'id' => $cabinet->getId(),
+                'clinicId' => $cabinet->getClinic()->getId(),
+                'number' => $cabinet->getNumber(),
+                'description' => $cabinet->getDescription()
+            ];
+        };
+
+        return $result;
     }
 
     public function deleteCabinet(string $id): void

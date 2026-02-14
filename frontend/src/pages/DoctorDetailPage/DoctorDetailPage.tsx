@@ -92,7 +92,7 @@ export const DoctorDetailPage: React.FC = () => {
                 <div className={styles.header}>
                     <div>
                         <Title level={2} className={styles.name}>
-                            {doctor.lastName} {doctor.firstName} {doctor.patronymic || ''}
+                            {doctor.lastname} {doctor.firstname} {doctor.patronymic || ''}
                         </Title>
                     </div>
                 </div>

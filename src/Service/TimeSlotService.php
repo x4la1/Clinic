@@ -3,64 +3,34 @@
 namespace App\Service;
 
 use App\Entity\TimeSlot;
-use App\Repository\StaffRepository;
 use App\Repository\TimeSlotRepository;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class TimeSlotService
 {
-    private TimeSlotRepository $timeSlotRepository;
-    private StaffRepository $staffRepository;
-
-    public function __construct(TimeSlotRepository $timeSlotRepository, StaffRepository $staffRepository)
+    public function __construct(private TimeSlotRepository $timeSlotRepository)
     {
-        $this->timeSlotRepository = $timeSlotRepository;
-        $this->staffRepository = $staffRepository;
     }
 
-    public function createTimeSlot(array $data): void
+    public function getAllTimeSlots(): array
     {
-        $staff_id = $data['staff_id'] ?? null;
-        $time = $data['time'] ?? null;
+        $timeSlots = $this->timeSlotRepository->findAll();
+        $result = [];
 
-        $staff = $this->staffRepository->find($staff_id);
-        if ($staff == null) {
-            throw new BadRequestHttpException("STAFF_NOT_FOUND");
+        foreach ($timeSlots as $timeSlot) {
+            $result[] = [
+                'id' => $timeSlot->getId(),
+                'slot' => $timeSlot->getSlot()->format('H:i'),
+            ];
         }
 
-        $timeSlot = new TimeSlot();
-        $timeSlot->setStaff($staff)
-            ->setSlot($time);
-
-        $this->timeSlotRepository->save($timeSlot);
+        return $result;
     }
 
-    public function createTimeSlots(array $data): void
+    public function getFreeTimeSlotByStaffId(int $staffId, string $date): array
     {
-        $staff_id = $data['staff_id'] ?? null;
-        $timeSlots = $data['timeSlots'] ?? null;
+        $newDate = new \DateTime($date);
+        $timeSlots = $this->timeSlotRepository->getFreeTimeSlotForStuff($staffId, $newDate);
 
-        $staff = $this->staffRepository->find($staff_id);
-        if($staff == null) {
-            throw new BadRequestHttpException("STAFF_NOT_FOUND");
-        }
-
-        $this->timeSlotRepository->createTimeSlots($staff, $timeSlots);
-
-    }
-
-    public function deleteTimeSlot(string $id): void
-    {
-        $timeslot = $this->timeSlotRepository->find($id);
-        if (!$timeslot) {
-            throw new BadRequestHttpException("TIMESLOT_NOT_FOUND");
-        }
-
-        $this->timeSlotRepository->delete($timeslot);
-    }
-
-    public function getTimeSlotByStaffId(string $id): array
-    {
-
+        return $timeSlots;
     }
 }

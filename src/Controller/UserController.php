@@ -77,6 +77,7 @@ class UserController extends AbstractController
                 'patronymic' => $user->getPatronymic(),
                 'phone' => $user->getPhone(),
                 'login' => $user->getLogin(),
+                'user_role' => $user->getRole()->getId(),
             ]);
         } catch (\Exception $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
@@ -102,18 +103,6 @@ class UserController extends AbstractController
         }
     }
 
-    #[Route('/user/appointments/{id}', name: 'user_appointments', methods: ['GET'])]
-    public function showUsersAppointments(UserService $userService, string $id): JsonResponse
-    {
-        try {
-            $user = $userService->findUser($id);
-            $data = $userService->getUserAppointment($id);
-            return new JsonResponse($data, Response::HTTP_OK);
-        } catch (\Exception $e) {
-            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
-        }
-    }
-
     #[Route('/user/reviews/{id}', name: 'user_reviews', methods: ['GET'])]
     public function showUserReviews(UserService $userService, string $id): JsonResponse
     {
@@ -126,11 +115,15 @@ class UserController extends AbstractController
         }
     }
 
-    #[Route('/users', name: 'users_p', methods: ['GET'])]
+    #[Route('/users', name: 'users_all', methods: ['GET'])]
     public function showUsers(UserService $userService): JsonResponse
     {
-        $users = $userService->getAllUsers();
-        return new JsonResponse($users, Response::HTTP_OK);
+        try {
+            $users = $userService->getAllUsers();
+            return new JsonResponse(['users' => $users], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse([], Response::HTTP_BAD_REQUEST);
+        }
     }
 
     private function validateUserData(array $data): bool

@@ -28,6 +28,18 @@ class CabinetController extends AbstractController
         }
     }
 
+    #[Route('/cabinets/all', name: 'get_all_cabinets', methods: ['GET'])]
+    public function getAllCabinets(CabinetService $cabinetService, Request $request): JsonResponse
+    {
+        try {
+            $cabinets = $cabinetService->getAllCabinets();
+            return new JsonResponse(['cabinets' => $cabinets], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+
+    }
+
     #[Route('/cabinet/delete', name: 'delete_cabinet', methods: ['POST'])]
     public function deleteCabinet(CabinetService $cabinetService, Request $request): JsonResponse
     {
@@ -67,7 +79,5 @@ class CabinetController extends AbstractController
         }
         return true;
     }
-
-    //все кабинеты
 
 }

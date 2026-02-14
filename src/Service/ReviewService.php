@@ -23,10 +23,22 @@ class ReviewService
     }
 
 
-    public function getAllReviews()
+    public function getAllReviews(): array
     {
         $reviews = $this->reviewRepository->findAll();
+        $result = [];
 
+        foreach ($reviews as $review) {
+            $result[] = [
+                'id' => $review->getId(),
+                'userId' => $review->getUser()->getId(),
+                'clinicId' => $review->getClinic()->getId(),
+                'description' => $review->getDescription(),
+                'status' => 'approved'
+            ];
+        }
+
+        return $result;
     }
 
     public function createReview(array $data): void

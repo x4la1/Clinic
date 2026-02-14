@@ -19,7 +19,7 @@ class ClinicController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!$this->validateClinic($data)) {
-            throw new BadRequestHttpException("INVALID_CLINIC_DATA");
+            return new JsonResponse(['error' => 'INVALID_CLINIC_DATA'], Response::HTTP_BAD_REQUEST);
         }
 
         try {
@@ -103,7 +103,7 @@ class ClinicController extends AbstractController
     {
         try {
             $clinics = $clinicService->getAllClinics();
-            return new JsonResponse($clinics, Response::HTTP_OK);
+            return new JsonResponse(['clinics' => $clinics], Response::HTTP_OK);
         } catch (\Exception $exception) {
             return new JsonResponse(['error' => $exception->getMessage(), Response::HTTP_BAD_REQUEST]);
         }

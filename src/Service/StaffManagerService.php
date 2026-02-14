@@ -170,7 +170,7 @@ class StaffManagerService
 
     public function updateServicesInStaff(string $staffId, array $services): void
     {
-        $this->staffRepository->updateStaffServices($staffId, $services);
+        $this->staffServiceRepository->updateStaffServices($staffId, $services);
     }
 
     public function updateSpecialisationInStaff(string $staffId, array $specialisations): void

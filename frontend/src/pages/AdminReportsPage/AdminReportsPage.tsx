@@ -146,7 +146,7 @@ export const AdminReportsPage: React.FC = () => {
 
                 return (
                   <tr key={doctor.id}>
-                    <td>{doctor.lastName} {doctor.firstName.charAt(0)}.</td>
+                    <td>{doctor.lastname} {doctor.firstname.charAt(0)}.</td>
                     <td>{doctorApps.length}</td>
                     <td>{completed}</td>
                     <td>{cancelled}</td>

@@ -40,6 +40,9 @@ export const AdminReviewsPage: React.FC = () => {
                 apiRequest<{ users: User[] }>('/api/users') // ok
             ]);
 
+            console.log('reviewsResponse:', reviewsResponse);
+            console.log('usersResponse:', usersResponse);
+
             setReviews(reviewsResponse.reviews || []);
             setUsers(usersResponse.users);
         } catch (e) {

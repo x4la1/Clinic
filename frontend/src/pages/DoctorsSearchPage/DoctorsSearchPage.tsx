@@ -60,7 +60,7 @@ export const DoctorsSearchPage: React.FC = () => {
     const filteredDoctors = useMemo(() => {
         return doctors.filter(doctor => {
             const matchesSearch =
-                `${doctor.lastName} ${doctor.firstName} ${doctor.patronymic || ''}`
+                `${doctor.lastname} ${doctor.firstname} ${doctor.patronymic || ''}`
                     .toLowerCase()
                     .includes(searchTerm.toLowerCase());
 
@@ -150,11 +150,11 @@ export const DoctorsSearchPage: React.FC = () => {
                                 <Link to={`/doctors/${doctor.id}`} className={styles.doctorLink}>
                                     <Card className={styles.doctorCard}>
                                         <Avatar size={60} style={{ backgroundColor: '#1890ff', marginBottom: '12px' }}>
-                                            {doctor.lastName.charAt(0)}
+                                            {doctor.lastname.charAt(0)}
                                         </Avatar>
                                         <div className={styles.doctorInfo}>
                                             <Text strong className={styles.doctorName}>
-                                                {doctor.lastName} {doctor.firstName.charAt(0)}. {doctor.patronymic?.charAt(0)}.
+                                                {doctor.lastname} {doctor.firstname.charAt(0)}. {doctor.patronymic?.charAt(0)}.
                                             </Text>
                                             <div className={styles.specializations}>
                                                 {getDoctorSpecializations(doctor).map((spec, idx) => (

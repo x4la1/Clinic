@@ -41,9 +41,10 @@ class Appointment
         return $this->user;
     }
 
-    public function setUser(?User $user): void
+    public function setUser(?User $user): static
     {
         $this->user = $user;
+        return $this;
     }
 
     public function getStaff(): ?Staff
@@ -51,9 +52,10 @@ class Appointment
         return $this->staff;
     }
 
-    public function setStaff(?Staff $staff): void
+    public function setStaff(?Staff $staff): static
     {
         $this->staff = $staff;
+        return $this;
     }
 
     public function getStatus(): ?Status
@@ -61,9 +63,10 @@ class Appointment
         return $this->status;
     }
 
-    public function setStatus(?Status $status): void
+    public function setStatus(?Status $status): static
     {
         $this->status = $status;
+        return $this;
     }
 
     public function getService(): ?Service
@@ -71,9 +74,10 @@ class Appointment
         return $this->service;
     }
 
-    public function setService(?Service $service): void
+    public function setService(?Service $service): static
     {
         $this->service = $service;
+        return $this;
     }
 
     public function getId(): ?int

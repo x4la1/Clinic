@@ -22,7 +22,7 @@ export const apiRequest = async <T>(
 
     if (!response.ok) {
       let errorMessage = 'Ошибка сервера';
-      
+
       if (response.status === 400) {
         errorMessage = 'Некорректные данные запроса';
       } else if (response.status === 401) {
@@ -40,7 +40,7 @@ export const apiRequest = async <T>(
     throw error;
   }
 
-  
+
 };
 
 export const getStatuses = async (): Promise<{ id: number; name: string }[]> => {
@@ -52,7 +52,7 @@ export const createAppointment = async (appointmentData: {
   staff_id: number;
   status_id: number;
   service_id: number;
-  date: string; 
+  date: string;
 }) => {
   return await apiRequest('/api/appointment/create', {
     method: 'POST',

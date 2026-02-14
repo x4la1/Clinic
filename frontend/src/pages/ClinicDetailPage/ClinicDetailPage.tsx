@@ -160,7 +160,7 @@ export const ClinicDetailPage: React.FC = () => {
                                 <Link to={`/doctors/${doctor.id}`} className={styles.doctorLink}>
                                     <Card className={styles.doctorCard}>
                                         <div className={styles.doctorName}>
-                                            {doctor.lastName} {doctor.firstName} {doctor.patronymic || ''}
+                                            {doctor.lastname} {doctor.firstname} {doctor.patronymic || ''}
                                         </div>
                                         <div className={styles.doctorExperience}>
                                             Опыт: {doctor.experienceYears} лет

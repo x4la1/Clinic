@@ -18,7 +18,7 @@ export const BookAppointmentPage: React.FC = () => {
   const user = useAppStore((state) => state.auth.user);
 
   useEffect(() => {
-    if (!user || user.roleId !== ROLE_IDS.PATIENT) {
+    if (!user || user.roleId !== 1) { //ТУТ надо в roles.tsx поменять значения для пациента и админа
       navigate('/');
     }
   }, [user, navigate]);
@@ -109,7 +109,7 @@ export const BookAppointmentPage: React.FC = () => {
   }
 };
 
-  if (!user || user.roleId !== ROLE_IDS.PATIENT) {
+  if (!user || user.roleId !== 1) { //ТУТ ТОЖЕ
     return (
       <div className={styles.loading}>
         <Spin size="large" />
@@ -164,7 +164,7 @@ export const BookAppointmentPage: React.FC = () => {
           >
             {availableDoctors.map(doctor => (
               <Option key={doctor.id} value={doctor.id}>
-                {doctor.lastName} {doctor.firstName} {doctor.patronymic}
+                {doctor.lastname} {doctor.firstname} {doctor.patronymic}
               </Option>
             ))}
           </Select>

@@ -26,7 +26,7 @@ export const PatientDashboardPage: React.FC = () => {
         navigate('/');
     };
 
-    if (!user || user.roleId !== ROLE_IDS.PATIENT) {
+    if (!user || user.roleId !== 1) { //ТУТ
         return (
             <div className={styles.loading}>
                 <Spin size="large" />

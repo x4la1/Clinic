@@ -34,7 +34,7 @@ class StaffRepository extends ServiceEntityRepository
     {
         $conn = $this->getEntityManager()->getConnection();
 
-        $sql = $sql = "
+        $sql = "
                     SELECT
                         staff.*,
                         clinic.name as clinic_name,
@@ -69,12 +69,11 @@ class StaffRepository extends ServiceEntityRepository
             if ($row['specializations']) {
                 $pairs = explode(',', $row['specializations']);
                 foreach ($pairs as $pair) {
-                    // Разделяем по разделителю '||'
                     if (strpos($pair, '||') !== false) {
                         list($id, $name) = explode('||', $pair, 2);
                         $specializations[] = [
-                            'id' => (int)$id,           // ← ID!
-                            'name' => trim($name)       // ← Name!
+                            'id' => (int)$id,
+                            'name' => trim($name)
                         ];
                     }
                 }
@@ -88,8 +87,8 @@ class StaffRepository extends ServiceEntityRepository
                     if (strpos($pair, '||') !== false) {
                         list($id, $name) = explode('||', $pair, 2);
                         $services[] = [
-                            'id' => (int)$id,           // ← ID!
-                            'name' => trim($name)       // ← Name!
+                            'id' => (int)$id,
+                            'name' => trim($name)
                         ];
                     }
                 }
@@ -97,13 +96,12 @@ class StaffRepository extends ServiceEntityRepository
 
             $formatted[] = [
                 'id' => $row['id'],
-                'full_name' => trim($row['last_name'] . ' ' . $row['first_name'] . ' ' . ($row['patronymic'] ?? '')),
-                'first_name' => $row['first_name'],
-                'last_name' => $row['last_name'],
+                'firstname' => $row['first_name'],
+                'lastname' => $row['last_name'],
                 'patronymic' => $row['patronymic'],
                 'phone' => $row['phone'],
                 'experience' => $row['experience'],
-                'experience_years' => $this->calculateExperienceYears(new \DateTime($row['experience'])),
+                'experienceYears' => $this->calculateExperienceYears(new \DateTime($row['experience'])),
 
                 'clinic' => [
                     'id' => $row['clinic_id'],
@@ -214,32 +212,7 @@ class StaffRepository extends ServiceEntityRepository
         ];
     }
 
-    public function updateStaffServices(string $staffId, array $newServiceIds): void
-    {
-        $staff = $this->findStaffById($staffId);
-        if (!$staff) {
-            throw new BadRequestException('STAFF_NOT_FOUND');
-        }
 
-        $conn = $this->getEntityManager()->getConnection();
-        $conn->executeStatement(
-            "DELETE FROM staff_service WHERE staff_id = :staffId",
-            ['staffId' => $staffId]
-        );
-
-        foreach ($newServiceIds as $serviceId) {
-            $service = $this->getEntityManager()->getRepository(Service::class)->find($serviceId);
-            if ($service) {
-                $staffService = new StaffService();
-                $staffService->setStaff($staff);
-                $staffService->setService($service);
-
-                $this->getEntityManager()->persist($staffService);
-            }
-        }
-
-        $this->getEntityManager()->flush();
-    }
 
     public function updateStaffSpecialisation(string $staffId, array $newSpecialisationIds): void
     {

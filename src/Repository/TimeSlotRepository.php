@@ -2,9 +2,12 @@
 
 namespace App\Repository;
 
-use App\Entity\Staff;
+use App\Entity\Appointment;
+use App\Entity\StaffTimeSlot;
 use App\Entity\TimeSlot;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Query\Parameter;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -17,51 +20,31 @@ class TimeSlotRepository extends ServiceEntityRepository
         parent::__construct($registry, TimeSlot::class);
     }
 
-    public function save(TimeSlot $timeSlot)
+    public function getFreeTimeSlotForStuff(int $stuffId, \DateTime $date): array
     {
-        $this->getEntityManager()->persist($timeSlot);
-        $this->getEntityManager()->flush();
-    }
+        $conn = $this->getEntityManager()->getConnection();
 
-    public function delete(TimeSlot $timeSlot)
-    {
-        $this->getEntityManager()->remove($timeSlot);
-        $this->getEntityManager()->flush();
-    }
+        $sql = "
+        SELECT ts.id, DATE_FORMAT(ts.slot, '%H:%i') AS slot
+        FROM time_slot ts
+        INNER JOIN staff_time_slot sts ON ts.id = sts.slot_id
+        WHERE
+            sts.staff_id = :staffId
+            AND ts.id NOT IN (
+                SELECT ts_booked.id
+                FROM appointment a
+                INNER JOIN time_slot ts_booked ON TIME(a.date) = ts_booked.slot
+                WHERE
+                    a.staff_id = :staffId
+                    AND DATE(a.date) = :selectedDate
+            )
+    ";
 
-    public function createTimeSlots(Staff $staffId, array $timeSlots): void
-    {
-        foreach ($timeSlots as $timeSlot) {
-            $TimeSlot = new TimeSlot();
-            $TimeSlot->setStaff($staffId);
-            $TimeSlot->setSlot(new \DateTime($timeSlot));
-            $this->getEntityManager()->persist($TimeSlot);
-        }
-        $this->getEntityManager()->flush();
-    }
+        $result = $conn->fetchAllAssociative($sql, [
+            'staffId' => $stuffId,
+            'selectedDate' => $date->format('Y-m-d')
+        ]);
 
-    public function deleteTimeSlot(string $id): void
-    {
-        $timeSlot = $this->getEntityManager()->getRepository(TimeSlot::class)->find($id);
-        $this->getEntityManager()->remove($timeSlot);
-    }
-
-    public function getSlotsByStaffId(string $staffId)
-    {
-        $qb = $this->createQueryBuilder('ts')
-            ->select('
-            ts.id,
-            ts.slot,
-            IDENTITY(ts.staff) as staff_id,
-            s.firstName as staff_first_name,
-            s.lastName as staff_last_name
-        ')
-            ->innerJoin('ts.staff', 's')
-            ->where('s.id = :staffId')
-            ->setParameter('staffId', $staffId)
-            ->orderBy('ts.slot', 'ASC')
-            ->getQuery();
-
-        return $qb->getArrayResult();
+        return $result;
     }
 }

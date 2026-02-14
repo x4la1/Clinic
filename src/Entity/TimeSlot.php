@@ -17,22 +17,6 @@ class TimeSlot
     #[ORM\Column(type: Types::TIME_MUTABLE)]
     private ?\DateTime $slot = null;
 
-    #[ORM\ManyToOne(targetEntity: Staff::class)]
-    #[ORM\JoinColumn(name: 'staff_id', nullable: false, onDelete: 'CASCADE')]
-    private Staff|null $staff = null;
-
-    public function getStaff(): ?Staff
-    {
-        return $this->staff;
-    }
-
-    public function setStaff(?Staff $staff): static
-    {
-        $this->staff = $staff;
-
-        return $this;
-    }
-
     public function getId(): ?int
     {
         return $this->id;
