@@ -42,8 +42,11 @@ export const AdminDashboardPage: React.FC = () => {
     date: null as dayjs.Dayjs | null,
   });
 
-  const [resultForm] = Form.useForm();
+  const [isEditAppointmentModalOpen, setIsEditAppointmentModalOpen] = useState(false);
+  const [editAppointmentForm] = Form.useForm();
   const [currentAppointment, setCurrentAppointment] = useState<Appointment | null>(null);
+  const [statuses, setStatuses] = useState<{ id: number; name: string }[]>([]);
+
   const [specializations, setSpecializations] = useState<Specialization[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
@@ -63,6 +66,13 @@ export const AdminDashboardPage: React.FC = () => {
   const loadAllData = async () => {
     try {
       setLoading(true);
+      
+      const statusesResponse = await apiRequest<{ statuses: { id: number; name: string }[] }>('/api/statuses');
+      setStatuses(statusesResponse.statuses || []);
+      
+      const timeSlotsResponse = await apiRequest<{ time_slots: TimeSlot[] }>('/api/timeslots/all');
+      setTimeSlots(timeSlotsResponse.time_slots);
+
       const [
         usersResponse,
         staffResponse,
@@ -72,13 +82,13 @@ export const AdminDashboardPage: React.FC = () => {
         specializationsResponse,
         servicesResponse
       ] = await Promise.all([
-        apiRequest<{ users: User[] }>('/api/users'), //ok
-        apiRequest<Staff[]>('/api/staffs'), //ok
-        apiRequest<{ appointments: Appointment[] }>('/api/appointments/all'), //ok
-        apiRequest<{ clinics: Clinic[] }>('/api/clinics/all'), //ok
-        apiRequest<{ cabinets: Cabinet[] }>('/api/cabinets/all'), //ok
-        apiRequest<Specialization[]>('/api/specializations'), //ok
-        apiRequest<Service[]>('/api/services') //ok
+        apiRequest<{ users: User[] }>('/api/users'),
+        apiRequest<Staff[]>('/api/staffs'),
+        apiRequest<{ appointments: Appointment[] }>('/api/appointments/all'),
+        apiRequest<{ clinics: Clinic[] }>('/api/clinics/all'),
+        apiRequest<{ cabinets: Cabinet[] }>('/api/cabinets/all'),
+        apiRequest<Specialization[]>('/api/specializations'),
+        apiRequest<Service[]>('/api/services')
       ]);
 
       setUsers(usersResponse.users);
@@ -100,10 +110,10 @@ export const AdminDashboardPage: React.FC = () => {
     let result = [...appointments];
 
     if (filters.staffId) {
-      result = result.filter(a => a.staff?.id === filters.staffId);
+      result = result.filter(a => a.staff.id === filters.staffId);
     }
     if (filters.statusId) {
-      result = result.filter(a => a.status?.id === filters.statusId);
+      result = result.filter(a => a.status.id === filters.statusId);
     }
     if (filters.date) {
       const dateStr = filters.date.format('YYYY-MM-DD');
@@ -120,36 +130,48 @@ export const AdminDashboardPage: React.FC = () => {
     navigate('/');
   };
 
-  const openResultModal = (appointment: Appointment) => {
+  const openEditAppointmentModal = (appointment: Appointment) => {
     setCurrentAppointment(appointment);
-    resultForm.setFieldsValue({ result: appointment.result || '' });
+    editAppointmentForm.setFieldsValue({ 
+      statusId: appointment.status.id,
+      result: appointment.result || ''
+    });
+    setIsEditAppointmentModalOpen(true);
   };
 
-  const handleSaveResult = async (values: any) => {
+  const handleSaveAppointmentChanges = async (values: any) => {
     try {
-      await apiRequest('/api/appointment/result/update', { //ок
-        method: 'POST',
-        body: JSON.stringify({
-          id: currentAppointment!.id,
-          result: values.result
-        }),
-      });
-      const updated = appointments.map(a =>
-        a.id === currentAppointment!.id
-          ? { ...a, result: values.result }
-          : a
-      );
-      setAppointments(updated);
-      message.success('Результат сохранён');
-      setCurrentAppointment(null);
+      if (values.statusId !== currentAppointment?.status.id) {
+        await apiRequest('/api/appointment/status/update', {
+          method: 'POST',
+          body: JSON.stringify({
+            id: currentAppointment!.id,
+            status_id: values.statusId
+          }),
+        });
+      }
+
+      if (values.result !== currentAppointment?.result) {
+        await apiRequest('/api/appointment/result/update', {
+          method: 'POST',
+          body: JSON.stringify({
+            id: currentAppointment!.id,
+            result: values.result
+          }),
+        });
+      }
+
+      message.success('Запись обновлена');
+      setIsEditAppointmentModalOpen(false);
+      loadAllData();
     } catch (error: any) {
-      message.error(error.message || 'Ошибка сохранения результата');
+      message.error(error.message || 'Ошибка при обновлении записи');
     }
   };
 
   const handleAddClinic = async (values: any) => {
     try {
-      await apiRequest('/api/clinic/create', { //ok
+      await apiRequest('/api/clinic/create', {
         method: 'POST',
         body: JSON.stringify({
           name: values.name,
@@ -171,19 +193,22 @@ export const AdminDashboardPage: React.FC = () => {
 
   const handleSaveStaff = async (values: any) => {
     try {
+      const clinicId = values.clinicId;
+      const cabinetId = values.cabinetId;
+
       const staffData = {
-        clinic_id: values.clinicId,
         firstname: values.firstName,
         lastname: values.lastName,
         patronymic: values.patronymic || '',
-        experience: dayjs().subtract(values.experience, 'year').format('YYYY-MM-DD'),
         phone: values.phone,
+        clinic_id: clinicId,
+        cabinet_id: cabinetId || null
       };
 
       let staffId: number;
 
       if (editingStaff) {
-        await apiRequest('/api/staff/update', { //ok
+        await apiRequest('/api/staff/update', {
           method: 'POST',
           body: JSON.stringify({
             ...staffData,
@@ -192,7 +217,7 @@ export const AdminDashboardPage: React.FC = () => {
         });
         staffId = editingStaff.id;
       } else {
-        const response = await apiRequest<{ id: number }>('/api/staff/create', { //ok
+        const response = await apiRequest<{ id: number }>('/api/staff/create', {
           method: 'POST',
           body: JSON.stringify(staffData),
         });
@@ -200,7 +225,7 @@ export const AdminDashboardPage: React.FC = () => {
       }
 
       if (values.specializations && values.specializations.length > 0) {
-        await apiRequest('/api/staff/specializations/update', { //ok
+        await apiRequest('/api/staff/specializations/update', {
           method: 'POST',
           body: JSON.stringify({
             id: staffId,
@@ -210,11 +235,21 @@ export const AdminDashboardPage: React.FC = () => {
       }
 
       if (values.services && values.services.length > 0) {
-        await apiRequest('/api/staff/services/update', { //ok
+        await apiRequest('/api/staff/services/update', {
           method: 'POST',
           body: JSON.stringify({
             id: staffId,
             services: values.services
+          }),
+        });
+      }
+
+      if (values.timeSlots && values.timeSlots.length > 0) {
+        await apiRequest('/api/staff/timeslots/update', {
+          method: 'POST',
+          body: JSON.stringify({
+            staff_id: staffId,
+            timeslots_ids: values.timeSlots
           }),
         });
       }
@@ -239,7 +274,7 @@ export const AdminDashboardPage: React.FC = () => {
       cancelText: 'Нет',
       onOk: async () => {
         try {
-          await apiRequest('/api/staff/delete', {//ok
+          await apiRequest('/api/staff/delete', {
             method: 'POST',
             body: JSON.stringify({ id: record.id }),
           });
@@ -252,53 +287,12 @@ export const AdminDashboardPage: React.FC = () => {
     });
   };
 
-  const handleAddTimeSlot = async (values: any) => {
-    try {
-      const slots = values.slots || [];
-      await apiRequest('/api/timeslots/create', {//hz
-        method: 'POST',
-        body: JSON.stringify({
-          staff_id: values.staffId,
-          slots: slots
-        }),
-      });
-      message.success('Слоты добавлены');
-      setIsTimeSlotModalOpen(false);
-      timeSlotForm.resetFields();
-      loadAllData();
-    } catch (error: any) {
-      message.error(error.message || 'Ошибка добавления слотов');
-    }
-  };
-
-  const handleDeleteTimeSlot = (record: TimeSlot) => {
-    Modal.confirm({
-      title: 'Удалить слот?',
-      content: `Вы уверены, что хотите удалить слот ${record.slot}?`,
-      okText: 'Да',
-      okType: 'danger',
-      cancelText: 'Нет',
-      onOk: async () => {
-        try {
-          await apiRequest('/api/timeslot/delete', { //hz
-            method: 'POST',
-            body: JSON.stringify({ id: record.id }),
-          });
-          message.success('Слот удалён');
-          loadAllData();
-        } catch (error: any) {
-          message.error(error.message || 'Ошибка удаления слота');
-        }
-      },
-    });
-  };
-
   const handleAddCabinet = async (values: any) => {
     try {
-      await apiRequest('/api/cabinet/create', { //ok
+      await apiRequest('/api/cabinet/create', {
         method: 'POST',
         body: JSON.stringify({
-          id: values.clinicId,
+          clinic_id: values.clinicId,
           number: values.number,
           description: values.description
         }),
@@ -321,7 +315,7 @@ export const AdminDashboardPage: React.FC = () => {
       cancelText: 'Нет',
       onOk: async () => {
         try {
-          await apiRequest('/api/cabinet/delete', {//ok
+          await apiRequest('/api/cabinet/delete', {
             method: 'POST',
             body: JSON.stringify({ id: record.id }),
           });
@@ -337,15 +331,18 @@ export const AdminDashboardPage: React.FC = () => {
   const handleCancelAppointment = (record: Appointment) => {
     Modal.confirm({
       title: 'Отменить запись?',
-      content: `Вы уверены, что хотите отменить запись пациента ID ${record.id}?`,
+      content: `Вы уверены, что хотите отменить запись пациента на ${record.date}?`,
       okText: 'Да, отменить',
       okType: 'danger',
       cancelText: 'Нет',
       onOk: async () => {
         try {
-          await apiRequest('/api/appointment/cancel', { //ne ok
+          await apiRequest('/api/appointment/status/update', {
             method: 'POST',
-            body: JSON.stringify({ id: record.id }),
+            body: JSON.stringify({ 
+              id: record.id, 
+              status_id: 3 // CANCELED
+            }),
           });
           message.success('Запись отменена');
           loadAllData();
@@ -355,9 +352,10 @@ export const AdminDashboardPage: React.FC = () => {
       },
     });
   };
+
   const handleCreateService = async (values: any) => {
     try {
-      await apiRequest('/api/service/create', { //ok
+      await apiRequest('/api/service/create', {
         method: 'POST',
         body: JSON.stringify({ name: values.name }),
       });
@@ -379,7 +377,7 @@ export const AdminDashboardPage: React.FC = () => {
       cancelText: 'Нет',
       onOk: async () => {
         try {
-          await apiRequest('/api/service/delete', { //ok
+          await apiRequest('/api/service/delete', {
             method: 'POST',
             body: JSON.stringify({ id: service.id }),
           });
@@ -394,7 +392,7 @@ export const AdminDashboardPage: React.FC = () => {
 
   const handleCreateSpecialization = async (values: any) => {
     try {
-      await apiRequest('/api/specialization/create', { //ok
+      await apiRequest('/api/specialization/create', {
         method: 'POST',
         body: JSON.stringify({ name: values.name }),
       });
@@ -416,7 +414,7 @@ export const AdminDashboardPage: React.FC = () => {
       cancelText: 'Нет',
       onOk: async () => {
         try {
-          await apiRequest('/api/specialization/delete', { //ok
+          await apiRequest('/api/specialization/delete', {
             method: 'POST',
             body: JSON.stringify({ id: spec.id }),
           });
@@ -438,7 +436,7 @@ export const AdminDashboardPage: React.FC = () => {
       cancelText: 'Нет',
       onOk: async () => {
         try {
-          await apiRequest('/api/clinic/delete', { //ok
+          await apiRequest('/api/clinic/delete', {
             method: 'POST',
             body: JSON.stringify({ id: record.id }),
           });
@@ -449,6 +447,15 @@ export const AdminDashboardPage: React.FC = () => {
         }
       },
     });
+  };
+
+  const getStatusName = (statusName: string) => {
+    switch (statusName) {
+      case 'SCHEDULED': return 'Запланировано';
+      case 'COMPLETED': return 'Завершено';
+      case 'CANCELED': return 'Отменено';
+      default: return statusName;
+    }
   };
 
   const clinicColumns = [
@@ -498,15 +505,14 @@ export const AdminDashboardPage: React.FC = () => {
       title: 'Пациент',
       key: 'patient',
       render: (_: any, record: Appointment) => {
-        const user = users.find(u => u.id === record.id);
-        return user ? `${user.lastName} ${user.firstName}` : `ID: ${record.id}`;
+        return `Запись от ${dayjs(record.date).format('DD.MM.YYYY')}`;
       }
     },
     {
       title: 'Врач',
       key: 'staff',
       render: (_: any, record: Appointment) => {
-        return `${record?.staff?.lastName || ''} ${record?.staff?.firstName || ''}`;
+        return `${record.staff.lastName} ${record.staff.firstName}`;
       }
     },
     {
@@ -520,8 +526,8 @@ export const AdminDashboardPage: React.FC = () => {
       key: 'status',
       render: (_: any, record: Appointment) => {
         let color = 'default';
-        let text = record.status?.name || 'Неизвестно';
-        switch (record.status?.name) {
+        let text = record.status.name || 'Неизвестно';
+        switch (record.status.name) {
           case 'SCHEDULED': color = 'blue'; text = 'Запланировано'; break;
           case 'COMPLETED': color = 'green'; text = 'Завершено'; break;
           case 'CANCELED': color = 'red'; text = 'Отменено'; break;
@@ -534,7 +540,7 @@ export const AdminDashboardPage: React.FC = () => {
       key: 'actions',
       render: (_: any, record: Appointment) => (
         <>
-          {record.status?.name !== 'CANCELED' && (
+          {record.status.name !== 'CANCELED' && (
             <Button
               type="link"
               danger
@@ -544,14 +550,13 @@ export const AdminDashboardPage: React.FC = () => {
               Отменить
             </Button>
           )}
-          {record.status?.name === 'COMPLETED' && (
-            <Button
-              type="link"
-              onClick={() => openResultModal(record)}
-            >
-              {record.result ? 'Результат' : 'Добавить результат'}
-            </Button>
-          )}
+          {/* КНОПКА РЕДАКТИРОВАНИЯ */}
+          <Button
+            type="link"
+            onClick={() => openEditAppointmentModal(record)}
+          >
+            Редактировать
+          </Button>
         </>
       ),
     },
@@ -590,10 +595,6 @@ export const AdminDashboardPage: React.FC = () => {
       },
     },
     {
-      title: 'Опыт',
-      render: (_: any, record: Staff) => `${record.experienceYears} лет`,
-    },
-    {
       title: 'Действия',
       key: 'actions',
       render: (_: any, record: Staff) => (
@@ -604,11 +605,15 @@ export const AdminDashboardPage: React.FC = () => {
             onClick={() => {
               setEditingStaff(record);
               staffForm.setFieldsValue({
-                ...record,
-                clinicId: record.clinic?.id,
-                cabinetId: record.cabinet?.id || null,
+                firstName: record.firstname,
+                lastName: record.lastname,
+                patronymic: record.patronymic || '',
+                phone: record.phone,
+                clinicId: record.clinic.id,
+                cabinetId: record.cabinet?.id || undefined,
                 specializations: record.specializations?.map(s => s.id) || [],
-                services: record.services?.map(s => s.id) || []
+                services: record.services?.map(s => s.id) || [],
+                timeSlots: [] 
               });
               setIsStaffModalOpen(true);
             }}
@@ -630,31 +635,10 @@ export const AdminDashboardPage: React.FC = () => {
 
   const timeSlotColumns = [
     {
-      title: 'Врач',
-      render: (_: any, record: TimeSlot) => {
-        const doctor = staff.find(s => s.id === record.staffId);
-        return doctor ? `${doctor.lastname} ${doctor.firstname}` : `ID: ${record.staffId}`;
-      }
-    },
-    {
       title: 'Время',
       dataIndex: 'slot',
       key: 'slot',
-    },
-    {
-      title: 'Действия',
-      key: 'actions',
-      render: (_: any, record: TimeSlot) => (
-        <Button
-          type="link"
-          danger
-          icon={<DeleteOutlined />}
-          onClick={() => handleDeleteTimeSlot(record)}
-        >
-          Удалить
-        </Button>
-      ),
-    },
+    }
   ];
 
   const cabinetColumns = [
@@ -874,25 +858,13 @@ export const AdminDashboardPage: React.FC = () => {
             label: 'Временные слоты',
             children: (
               <Card
-                title="Расписание врачей"
-                extra={
-                  <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => {
-                      timeSlotForm.resetFields();
-                      setIsTimeSlotModalOpen(true);
-                    }}
-                  >
-                    Добавить слоты
-                  </Button>
-                }
+                title="Все доступные временные слоты"
               >
                 <Table
                   dataSource={timeSlots}
                   columns={timeSlotColumns}
                   rowKey="id"
-                  pagination={{ pageSize: 10 }}
+                  pagination={{ pageSize: 20 }}
                 />
               </Card>
             ),
@@ -977,6 +949,7 @@ export const AdminDashboardPage: React.FC = () => {
           }
         ]}
       />
+      
       <Modal
         title="Добавить поликлинику"
         open={isClinicModalOpen}
@@ -1028,6 +1001,41 @@ export const AdminDashboardPage: React.FC = () => {
           <Form.Item name="patronymic" label="Отчество">
             <Input placeholder="Иванович" />
           </Form.Item>
+          
+          <Form.Item name="clinicId" label="Поликлиника" rules={[{ required: true }]}>
+            <Select 
+              placeholder="Выберите поликлинику"
+              onChange={() => {
+                staffForm.setFieldsValue({ cabinetId: undefined });
+              }}
+            >
+              {clinics.map(clinic => (
+                <Option key={clinic.id} value={clinic.id}>
+                  {clinic.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+          
+          <Form.Item noStyle shouldUpdate={(prev, current) => prev.clinicId !== current.clinicId}>
+            {({ getFieldValue }) => {
+              const clinicId = getFieldValue('clinicId');
+              const clinicCabinets = cabinets.filter(c => c.clinicId === clinicId);
+              
+              return clinicId ? (
+                <Form.Item name="cabinetId" label="Кабинет">
+                  <Select placeholder="Выберите кабинет">
+                    {clinicCabinets.map(cabinet => (
+                      <Option key={cabinet.id} value={cabinet.id}>
+                        {cabinet.number} - {cabinet.description}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              ) : null;
+            }}
+          </Form.Item>
+
           <Form.Item name="specializations" label="Специализации">
             <Select mode="multiple" placeholder="Выберите специализации">
               {specializations.map(spec => (
@@ -1042,68 +1050,23 @@ export const AdminDashboardPage: React.FC = () => {
               ))}
             </Select>
           </Form.Item>
-          <Form.Item name="clinicId" label="Поликлиника" rules={[{ required: true }]}>
-            <Select placeholder="Выберите поликлинику">
-              {clinics.map(clinic => (
-                <Option key={clinic.id} value={clinic.id}>
-                  {clinic.name}
+          
+          <Form.Item name="timeSlots" label="Временные слоты">
+            <Select mode="multiple" placeholder="Выберите временные слоты">
+              {timeSlots.map(slot => (
+                <Option key={slot.id} value={slot.id.toString()}>
+                  {slot.slot}
                 </Option>
               ))}
             </Select>
           </Form.Item>
-          <Form.Item name="cabinetId" label="Кабинет">
-            <Select placeholder="Выберите кабинет (опционально)">
-              <Option value={null}>Без кабинета</Option>
-              {cabinets.map(cabinet => (
-                <Option key={cabinet.id} value={cabinet.id}>
-                  {cabinet.number} - {cabinet.description}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item name="experience" label="Опыт (лет)" rules={[{ required: true }]}>
-            <Input type="number" min={0} placeholder="10" />
-          </Form.Item>
+          
           <Form.Item name="phone" label="Телефон" rules={[{ required: true }]}>
             <Input placeholder="+7 (999) 123-45-67" />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" block>
               {editingStaff ? 'Сохранить' : 'Добавить'}
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Modal
-        title="Добавить временные слоты"
-        open={isTimeSlotModalOpen}
-        onCancel={() => {
-          setIsTimeSlotModalOpen(false);
-          timeSlotForm.resetFields();
-        }}
-        footer={null}
-      >
-        <Form form={timeSlotForm} layout="vertical" onFinish={handleAddTimeSlot}>
-          <Form.Item name="staffId" label="Врач" rules={[{ required: true }]}>
-            <Select placeholder="Выберите врача">
-              {staff.map(doctor => (
-                <Option key={doctor.id} value={doctor.id}>
-                  {doctor.lastname} {doctor.firstname}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item name="slots" label="Временные слоты" rules={[{ required: true }]}>
-            <Select
-              mode="tags"
-              placeholder="Введите время (например, 09:00)"
-              tokenSeparators={[',']}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" block>
-              Добавить
             </Button>
           </Form.Item>
         </Form>
@@ -1143,18 +1106,39 @@ export const AdminDashboardPage: React.FC = () => {
       </Modal>
 
       <Modal
-        title="Результат приёма"
-        open={!!currentAppointment}
-        onCancel={() => setCurrentAppointment(null)}
+        title="Редактирование записи"
+        open={isEditAppointmentModalOpen}
+        onCancel={() => {
+          setIsEditAppointmentModalOpen(false);
+          setCurrentAppointment(null);
+          editAppointmentForm.resetFields();
+        }}
         footer={null}
+        width={600}
       >
-        <Form form={resultForm} onFinish={handleSaveResult}>
-          <Form.Item name="result" label="Описание">
-            <Input.TextArea rows={4} />
+        <Form form={editAppointmentForm} layout="vertical" onFinish={handleSaveAppointmentChanges}>
+          <Form.Item name="statusId" label="Статус" rules={[{ required: true }]}>
+            <Select>
+              {statuses.map(status => (
+                <Option key={status.id} value={status.id}>
+                  {getStatusName(status.name)}
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
-          <Button type="primary" htmlType="submit">Сохранить</Button>
+          
+          <Form.Item name="result" label="Результат приёма">
+            <Input.TextArea rows={4} placeholder="Введите результат приёма..." />
+          </Form.Item>
+          
+          <Form.Item>
+            <Button type="primary" htmlType="submit" block>
+              Сохранить изменения
+            </Button>
+          </Form.Item>
         </Form>
       </Modal>
+      
       <Modal
         title="Добавить услугу"
         open={isServiceModalOpen}
@@ -1175,6 +1159,7 @@ export const AdminDashboardPage: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
+      
       <Modal
         title="Добавить специализацию"
         open={isSpecializationModalOpen}

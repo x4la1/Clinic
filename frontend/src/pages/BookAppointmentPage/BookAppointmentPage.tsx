@@ -4,10 +4,10 @@ import { LeftOutlined } from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { useAppStore } from '../../store';
-import type { Clinic, Staff, Service } from '../../types';
+import type { Clinic, Staff, Service, TimeSlot } from '../../types';
 import styles from './BookAppointmentPage.module.scss';
 import { ROLE_IDS } from '../../utils/roles';
-import { apiRequest, createAppointment } from '../../utils/api';
+import { apiRequest } from '../../utils/api';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -18,7 +18,7 @@ export const BookAppointmentPage: React.FC = () => {
   const user = useAppStore((state) => state.auth.user);
 
   useEffect(() => {
-    if (!user || user.roleId !== 1) { //ТУТ надо в roles.tsx поменять значения для пациента и админа
+    if (!user || user.roleId !== ROLE_IDS.PATIENT) {
       navigate('/');
     }
   }, [user, navigate]);
@@ -35,6 +35,7 @@ export const BookAppointmentPage: React.FC = () => {
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [staff, setStaff] = useState<Staff[]>([]);
   const [services, setServices] = useState<Service[]>([]);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
 
   useEffect(() => {
     loadAllData();
@@ -47,9 +48,9 @@ export const BookAppointmentPage: React.FC = () => {
         staffResponse,
         servicesResponse
       ] = await Promise.all([
-        apiRequest<{ clinics: Clinic[] }>('/api/clinics/all'), //ok
-        apiRequest<Staff[]>('/api/staffs'), //ok
-        apiRequest<Service[]>('/api/services') //ok
+        apiRequest<{ clinics: Clinic[] }>('/api/clinics/all'),
+        apiRequest<Staff[]>('/api/staffs'),
+        apiRequest<Service[]>('/api/services')
       ]);
 
       setClinics(clinicsResponse.clinics || []);
@@ -57,6 +58,7 @@ export const BookAppointmentPage: React.FC = () => {
       setServices(servicesResponse);
     } catch (e) {
       console.error('Failed to load data', e);
+      message.error('Ошибка загрузки данных');
     }
   };
 
@@ -73,6 +75,29 @@ export const BookAppointmentPage: React.FC = () => {
     }
   }, [preselectedClinicId, preselectedDoctorId, staff]);
 
+  useEffect(() => {
+    if (doctorId && selectedDate) {
+      loadAvailableTimeSlots(doctorId, selectedDate);
+    } else {
+      setAvailableTimeSlots([]);
+      setTimeSlot(null);
+    }
+  }, [doctorId, selectedDate]);
+
+  const loadAvailableTimeSlots = async (staffId: number, date: dayjs.Dayjs) => {
+    try {
+      const formattedDate = date.format('YYYY-MM-DD');
+      const response = await apiRequest<{ time_slots: TimeSlot[] }>(
+        `/api/staff/timeslots/${staffId}/${formattedDate}`
+      );
+      setAvailableTimeSlots(response.time_slots || []);
+    } catch (e) {
+      console.error('Failed to load available time slots', e);
+      message.error('Не удалось загрузить доступное время');
+      setAvailableTimeSlots([]);
+    }
+  };
+
   const availableDoctors = clinicId ? staff.filter(s => s.clinic?.id === clinicId) : [];
 
   const doctorServices = doctorId
@@ -82,34 +107,36 @@ export const BookAppointmentPage: React.FC = () => {
   const isWeekend = (date: dayjs.Dayjs) => date.day() === 0 || date.day() === 6;
 
   const handleBook = async () => {
-  if (!doctorId || !selectedDate || !timeSlot || !serviceId) {
-    message.error('Заполните все поля');
-    return;
-  }
+    if (!doctorId || !selectedDate || !timeSlot || !serviceId) {
+      message.error('Заполните все поля');
+      return;
+    }
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const dateTimeStr = selectedDate.format('YYYY-MM-DD') + ' ' + timeSlot + ':00';
+      const dateTimeStr = `${selectedDate.format('YYYY-MM-DD')} ${timeSlot}:00`;
 
-    await createAppointment({
-      user_id: user!.id,
-      staff_id: doctorId,
-      status_id: 1,
-      service_id: serviceId,
-      date: dateTimeStr
-    });
+      await apiRequest('/api/appointment/create', {
+        method: 'POST',
+        body: JSON.stringify({
+          user_id: user!.id,
+          staff_id: doctorId,
+          service_id: serviceId,
+          date: dateTimeStr
+        })
+      });
 
-    message.success('Вы успешно записаны!');
-    setTimeout(() => navigate('/patient'), 1500);
-  } catch (error: any) {
-    message.error(error.message || 'Ошибка при записи');
-  } finally {
-    setLoading(false);
-  }
-};
+      message.success('Вы успешно записаны!');
+      setTimeout(() => navigate('/patient'), 1500);
+    } catch (error: any) {
+      message.error(error.message || 'Ошибка при записи');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  if (!user || user.roleId !== 1) { //ТУТ ТОЖЕ
+  if (!user || user.roleId !== ROLE_IDS.PATIENT) {
     return (
       <div className={styles.loading}>
         <Spin size="large" />
@@ -212,12 +239,12 @@ export const BookAppointmentPage: React.FC = () => {
             placeholder="Сначала выберите дату"
             value={timeSlot}
             onChange={setTimeSlot}
-            disabled={!selectedDate || isWeekend(selectedDate!)}
+            disabled={!selectedDate || isWeekend(selectedDate!) || availableTimeSlots.length === 0}
             style={{ width: '100%' }}
           >
-            {['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'].map(time => (
-              <Option key={time} value={time}>
-                {time}
+            {availableTimeSlots.map(slot => (
+              <Option key={slot.id} value={slot.slot}>
+                {slot.slot}
               </Option>
             ))}
           </Select>
@@ -229,7 +256,7 @@ export const BookAppointmentPage: React.FC = () => {
           size="large"
           onClick={handleBook}
           loading={loading}
-          disabled={!doctorId || !selectedDate || !timeSlot || !serviceId || isWeekend(selectedDate!)}
+          disabled={!doctorId || !selectedDate || !timeSlot || !serviceId || isWeekend(selectedDate!) || availableTimeSlots.length === 0}
           className={styles.submitButton}
         >
           Записаться

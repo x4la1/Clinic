@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Table, Button, Tag, Select, Spin, message, Modal } from 'antd';
-import { CheckCircleOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { Card, Table, Button, Select, Spin, message, Modal } from 'antd';
+import { DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store';
 import type { User, Review } from '../../types';
@@ -17,7 +17,6 @@ export const AdminReviewsPage: React.FC = () => {
 
     const [reviews, setReviews] = useState<Review[]>([]);
     const [users, setUsers] = useState<User[]>([]);
-    const [filterStatus, setFilterStatus] = useState<'new' | 'approved' | 'rejected' | 'all'>('all');
 
     useEffect(() => {
         if (!auth.user || auth.user.roleId !== ROLE_IDS.ADMIN) {
@@ -36,36 +35,21 @@ export const AdminReviewsPage: React.FC = () => {
                 reviewsResponse,
                 usersResponse
             ] = await Promise.all([
-                apiRequest<{ reviews: Review[] }>('/api/reviews/all'), //ne ok
-                apiRequest<{ users: User[] }>('/api/users') // ok
+                apiRequest<{ reviews: Review[] }>('/api/reviews/all'),
+                apiRequest<{ users: User[] }>('/api/users')
             ]);
-
-            console.log('reviewsResponse:', reviewsResponse);
-            console.log('usersResponse:', usersResponse);
 
             setReviews(reviewsResponse.reviews || []);
             setUsers(usersResponse.users);
         } catch (e) {
             console.error('Failed to load reviews', e);
+            message.error('Ошибка загрузки отзывов');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleApprove = async (id: number) => {
-        try {
-            await apiRequest('/api/review/approve', { //hz
-                method: 'POST',
-                body: JSON.stringify({ id })
-            });
-            message.success('Отзыв одобрен');
-            loadData();
-        } catch (error: any) {
-            message.error(error.message || 'Ошибка при одобрении отзыва');
-        }
-    };
-
-    const handleReject = (id: number) => {
+    const handleDelete = (id: number) => {
         Modal.confirm({
             title: 'Удалить отзыв?',
             content: 'Вы уверены, что хотите удалить этот отзыв?',
@@ -74,7 +58,7 @@ export const AdminReviewsPage: React.FC = () => {
             cancelText: 'Нет',
             onOk: async () => {
                 try {
-                    await apiRequest('/api/review/delete', { //ok
+                    await apiRequest('/api/review/delete', {
                         method: 'POST',
                         body: JSON.stringify({ id })
                     });
@@ -96,19 +80,6 @@ export const AdminReviewsPage: React.FC = () => {
         const clinic = clinics.find(c => c.id === clinicId);
         return clinic ? clinic.name : `Поликлиника ID: ${clinicId}`;
     };
-
-    const getStatusTag = (status: 'new' | 'approved' | 'rejected') => {
-        switch (status) {
-            case 'new': return <Tag color="blue">Новый</Tag>;
-            case 'approved': return <Tag color="green">Одобрен</Tag>;
-            case 'rejected': return <Tag color="red">Удалён</Tag>;
-            default: return <Tag>{status}</Tag>;
-        }
-    };
-
-    const filteredReviews = filterStatus === 'all'
-        ? reviews
-        : reviews.filter(r => r.status === filterStatus);
 
     const columns = [
         {
@@ -141,36 +112,17 @@ export const AdminReviewsPage: React.FC = () => {
             ),
         },
         {
-            title: 'Статус',
-            key: 'status',
-            render: (_: any, record: Review) => getStatusTag(record.status as any),
-        },
-        {
             title: 'Действия',
             key: 'actions',
             render: (_: any, record: Review) => (
-                <>
-                    {record.status === 'new' && (
-                        <>
-                            <Button
-                                type="link"
-                                icon={<CheckCircleOutlined />}
-                                onClick={() => handleApprove(record.id)}
-                                style={{ color: '#52c41a' }}
-                            >
-                                Одобрить
-                            </Button>
-                            <Button
-                                type="link"
-                                icon={<DeleteOutlined />}
-                                danger
-                                onClick={() => handleReject(record.id)}
-                            >
-                                Удалить
-                            </Button>
-                        </>
-                    )}
-                </>
+                <Button
+                    type="link"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() => handleDelete(record.id)}
+                >
+                    Удалить
+                </Button>
             ),
         },
     ];
@@ -187,30 +139,14 @@ export const AdminReviewsPage: React.FC = () => {
         <div className={styles.container}>
             <h1 className={styles.title}>Модерация отзывов</h1>
 
-            <Card
-                title="Фильтрация"
-                style={{ marginBottom: 24 }}
-            >
-                <Select
-                    value={filterStatus}
-                    onChange={(value) => setFilterStatus(value as any)}
-                    style={{ width: 200 }}
-                >
-                    <Option value="all">Все отзывы</Option>
-                    <Option value="new">Новые</Option>
-                    <Option value="approved">Одобренные</Option>
-                    <Option value="rejected">Удалённые</Option>
-                </Select>
-            </Card>
-
-            <Card title={`Отзывы (${filteredReviews.length})`}>
-                {filteredReviews.length === 0 ? (
+            <Card title={`Все отзывы (${reviews.length})`}>
+                {reviews.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: 24 }}>
                         Нет отзывов
                     </div>
                 ) : (
                     <Table
-                        dataSource={filteredReviews}
+                        dataSource={reviews}
                         columns={columns}
                         rowKey="id"
                         pagination={{ pageSize: 10 }}

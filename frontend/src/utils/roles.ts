@@ -1,7 +1,7 @@
 export const ROLE_IDS = {
-  GUEST: 1,
-  PATIENT: 2,
-  ADMIN: 3,
+  PATIENT: 1,
+  ADMIN: 2,
+  GUEST: 3,
 } as const;
 
 export const getRoleName = (roleId: number): 'guest' | 'patient' | 'admin' => {

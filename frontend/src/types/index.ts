@@ -43,12 +43,12 @@ export interface Specialization {
 
 export interface Staff {
   id: number;
-  firstName: string;
-  lastName: string;
+  firstname: string;
+  lastname: string;
   patronymic: string;
   phone: string;
-  experience: string;
-  experienceYears: number;
+  // experience: string;
+  // experienceYears: number;
   clinic: Clinic;
   cabinet: Cabinet | null;
   specializations: Specialization[];
@@ -93,5 +93,4 @@ export interface Review {
   userId: number;
   clinicId: number;
   description: string;
-  status: 'new' | 'approved' | 'rejected';
 }

@@ -20,7 +20,7 @@ export const PatientAppointmentsPage: React.FC = () => {
   const [clinics, setClinics] = useState<Clinic[]>([]);
 
   useEffect(() => {
-    if (!user || user.roleId !== 1) { //ТУТ
+    if (!user || user.roleId !== ROLE_IDS.PATIENT) {
       navigate('/');
       return;
     }
@@ -37,9 +37,9 @@ export const PatientAppointmentsPage: React.FC = () => {
         staffResponse,
         clinicsResponse
       ] = await Promise.all([
-        apiRequest<{ appointments: Appointment[] }>(`/api/user/appointments/${user!.id}`), //neok
-        apiRequest<Staff[]>('/api/staffs'), //ok
-        apiRequest<{ clinics: Clinic[] }>('/api/clinics/all')//ok
+        apiRequest<{ appointments: Appointment[] }>(`/api/user/appointments/${user!.id}`),
+        apiRequest<Staff[]>('/api/staffs'),
+        apiRequest<{ clinics: Clinic[] }>('/api/clinics/all')
       ]);
 
       setAppointments(appointmentsResponse.appointments || []);
@@ -48,6 +48,7 @@ export const PatientAppointmentsPage: React.FC = () => {
 
     } catch (e) {
       console.error('Failed to load appointments', e);
+      message.error('Ошибка загрузки записей');
       setAppointments([]);
     } finally {
       setLoading(false);
@@ -64,9 +65,12 @@ export const PatientAppointmentsPage: React.FC = () => {
       cancelText: 'Нет',
       onOk: async () => {
         try {
-          await apiRequest('/api/appointment/cancel', { //ne ok
+          await apiRequest('/api/appointment/status/update', {
             method: 'POST',
-            body: JSON.stringify({ id: record.id }),
+            body: JSON.stringify({
+              id: record.id,
+              status_id: 3
+            }),
           });
           message.success('Запись отменена');
           loadAppointments();

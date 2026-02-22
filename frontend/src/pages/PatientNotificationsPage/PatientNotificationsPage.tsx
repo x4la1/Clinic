@@ -11,10 +11,19 @@ import { apiRequest } from '../../utils/api';
 
 const { Title, Text } = Typography;
 
+interface Notification {
+  id: number;
+  type: 'upcoming_appointment';
+  title: string;
+  message: string;
+  date: string;
+  isRead: boolean;
+}
+
 export const PatientNotificationsPage: React.FC = () => {
     const navigate = useNavigate();
     const user = useAppStore((state) => state.auth.user);
-    const [notifications, setNotifications] = useState<any[]>([]);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -41,33 +50,31 @@ export const PatientNotificationsPage: React.FC = () => {
             const appointments = appointmentsResponse.appointments || [];
             const staff = staffResponse;
             const now = dayjs();
-            const upcomingNotifications: any[] = [];
+            const upcomingNotifications: Notification[] = [];
 
             appointments.forEach(app => {
-                if (app.status?.name === 'CANCELED') return;
+                if (app.status.name === 'CANCELED' || app.status.name === 'COMPLETED') {
+                    return;
+                }
 
                 const doctor = staff.find(s => s.id === app.staff?.id);
                 const appointmentDate = dayjs(app.date);
                 const diffHours = appointmentDate.diff(now, 'hour');
 
                 if (diffHours > 0 && diffHours <= 24) {
+                    let title = 'Предстоящий приём';
+                    let messageText = `У вас запись к врачу ${doctor ? `${doctor.lastname} ${doctor.firstname}` : 'врачу'} ${appointmentDate.format('DD.MM.YYYY HH:mm')}`;
+                    
+                    if (diffHours <= 2) {
+                        title = 'Скоро приём!';
+                        messageText = `Ваш приём начнётся через ${Math.abs(diffHours)} час(а/ов)`;
+                    }
+
                     upcomingNotifications.push({
                         id: app.id,
-                        patientId: user!.id,
                         type: 'upcoming_appointment',
-                        title: 'Предстоящий приём',
-                        message: `У вас запись к врачу ${doctor ? `${doctor.lastName} ${doctor.firstName}` : 'врачу'} ${appointmentDate.format('DD.MM.YYYY HH:mm')}`,
-                        date: app.date,
-                        isRead: false,
-                    });
-                }
-                else if (diffHours > 0 && diffHours <= 2) {
-                    upcomingNotifications.push({
-                        id: app.id + 100000,
-                        patientId: user!.id,
-                        type: 'upcoming_appointment',
-                        title: 'Скоро приём!',
-                        message: `Ваш приём начнётся через ${Math.abs(diffHours)} час(а/ов)`,
+                        title,
+                        message: messageText,
                         date: app.date,
                         isRead: false,
                     });
@@ -75,12 +82,13 @@ export const PatientNotificationsPage: React.FC = () => {
             });
 
             upcomingNotifications.sort((a, b) =>
-                dayjs(b.date).valueOf() - dayjs(a.date).valueOf()
+                dayjs(a.date).valueOf() - dayjs(b.date).valueOf()
             );
 
             setNotifications(upcomingNotifications);
         } catch (e) {
             console.error('Failed to load notifications', e);
+            message.error('Ошибка загрузки уведомлений');
             setNotifications([]);
         } finally {
             setLoading(false);

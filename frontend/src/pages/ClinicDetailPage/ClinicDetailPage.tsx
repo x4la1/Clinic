@@ -49,22 +49,23 @@ export const ClinicDetailPage: React.FC = () => {
                 reviewsResponse,
                 usersResponse
             ] = await Promise.all([
-                apiRequest<Staff[]>('/api/staffs'),//ok
-                apiRequest<{ reviews: Review[] }>('/api/reviews/all'), //ne ok
-                apiRequest<{ users: User[] }>('/api/users') //ok
+                apiRequest<Staff[]>('/api/staffs'),
+                apiRequest<{ reviews: Review[] }>('/api/reviews/all'),
+                apiRequest<{ users: User[] }>('/api/users')
             ]);
 
             const clinicDoctors = staffResponse.filter(s => s.clinic?.id === clinicId);
             setDoctors(clinicDoctors);
 
-            const approvedReviews = (reviewsResponse.reviews || [])
+            const clinicReviews = (reviewsResponse.reviews || [])
                 .filter(r => r.clinicId === clinicId);
-            setReviews(approvedReviews);
+            setReviews(clinicReviews);
 
             setUsers(usersResponse.users);
 
         } catch (e) {
             console.error('Failed to load data', e);
+            message.error('Ошибка загрузки данных');
         } finally {
             setLoading(false);
         }
@@ -79,7 +80,7 @@ export const ClinicDetailPage: React.FC = () => {
         if (!user || !clinic) return;
 
         try {
-            await apiRequest('/api/review/create', { //ok
+            await apiRequest('/api/review/create', {
                 method: 'POST',
                 body: JSON.stringify({
                     user_id: user.id,
@@ -149,6 +150,7 @@ export const ClinicDetailPage: React.FC = () => {
                     Записаться к врачу
                 </Button>
             </Card>
+
             <div className={styles.doctorsSection}>
                 <Title level={3}>Врачи поликлиники</Title>
                 {doctors.length === 0 ? (
@@ -162,9 +164,6 @@ export const ClinicDetailPage: React.FC = () => {
                                         <div className={styles.doctorName}>
                                             {doctor.lastname} {doctor.firstname} {doctor.patronymic || ''}
                                         </div>
-                                        <div className={styles.doctorExperience}>
-                                            Опыт: {doctor.experienceYears} лет
-                                        </div>
                                     </Card>
                                 </Link>
                             </Col>
@@ -172,6 +171,7 @@ export const ClinicDetailPage: React.FC = () => {
                     </Row>
                 )}
             </div>
+
             <div className={styles.reviewsSection}>
                 <Title level={3}>Отзывы</Title>
                 {reviews.length > 0 ? (

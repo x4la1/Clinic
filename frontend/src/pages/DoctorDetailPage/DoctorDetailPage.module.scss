@@ -82,3 +82,24 @@
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
+
+.specTag {
+  display: inline-block;
+  background: #f5f7fa;
+  color: #333;
+  padding: 4px 12px;
+  border-radius: 16px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.serviceItem {
+  padding: 8px 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 14px;
+}

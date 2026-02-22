@@ -33,9 +33,9 @@ export const AdminReportsPage: React.FC = () => {
         staffResponse,
         appointmentsResponse
       ] = await Promise.all([
-        apiRequest<{ users: User[] }>('/api/users'), //ok
-        apiRequest<Staff[]>('/api/staffs'), //ok
-        apiRequest<{ appointments: Appointment[] }>('/api/appointments/all')//ne ok
+        apiRequest<{ users: User[] }>('/api/users'),
+        apiRequest<Staff[]>('/api/staffs'),
+        apiRequest<{ appointments: Appointment[] }>('/api/appointments/all')
       ]);
 
       setUsers(usersResponse.users);
@@ -49,23 +49,14 @@ export const AdminReportsPage: React.FC = () => {
     }
   };
 
-  const getStatusName = (statusName: string) => {
-    switch (statusName) {
-      case 'SCHEDULED': return 'Запланировано';
-      case 'COMPLETED': return 'Завершено';
-      case 'CANCELED': return 'Отменено';
-      default: return statusName;
-    }
-  };
-
   const totalPatients = users.filter(u => u.roleId === ROLE_IDS.PATIENT).length;
   const totalDoctors = staff.length;
   const totalClinics = clinics.length;
   const totalAppointments = appointments.length;
 
-  const confirmedAppointments = appointments.filter(a => a.status?.name === 'COMPLETED').length;
-  const cancelledAppointments = appointments.filter(a => a.status?.name === 'CANCELED').length;
-  const pendingAppointments = appointments.filter(a => a.status?.name === 'SCHEDULED').length;
+  const completedAppointments = appointments.filter(a => a.status.name === 'COMPLETED').length;
+  const cancelledAppointments = appointments.filter(a => a.status.name === 'CANCELED').length;
+  const scheduledAppointments = appointments.filter(a => a.status.name === 'SCHEDULED').length;
 
   if (loading) {
     return (
@@ -78,7 +69,6 @@ export const AdminReportsPage: React.FC = () => {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Отчёты</h1>
-
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} md={6}>
           <Card>
@@ -113,7 +103,7 @@ export const AdminReportsPage: React.FC = () => {
           <tbody>
             <tr>
               <td>Завершено</td>
-              <td>{confirmedAppointments}</td>
+              <td>{completedAppointments}</td>
             </tr>
             <tr>
               <td>Отменено</td>
@@ -121,7 +111,7 @@ export const AdminReportsPage: React.FC = () => {
             </tr>
             <tr>
               <td>Запланировано</td>
-              <td>{pendingAppointments}</td>
+              <td>{scheduledAppointments}</td>
             </tr>
           </tbody>
         </table>
@@ -140,14 +130,14 @@ export const AdminReportsPage: React.FC = () => {
             </thead>
             <tbody>
               {staff.map(doctor => {
-                const doctorApps = appointments.filter(a => a.staff?.id === doctor.id);
-                const completed = doctorApps.filter(a => a.status?.name === 'COMPLETED').length;
-                const cancelled = doctorApps.filter(a => a.status?.name === 'CANCELED').length;
+                const doctorAppointments = appointments.filter(a => a.staff.id === doctor.id);
+                const completed = doctorAppointments.filter(a => a.status.name === 'COMPLETED').length;
+                const cancelled = doctorAppointments.filter(a => a.status.name === 'CANCELED').length;
 
                 return (
                   <tr key={doctor.id}>
                     <td>{doctor.lastname} {doctor.firstname.charAt(0)}.</td>
-                    <td>{doctorApps.length}</td>
+                    <td>{doctorAppointments.length}</td>
                     <td>{completed}</td>
                     <td>{cancelled}</td>
                   </tr>

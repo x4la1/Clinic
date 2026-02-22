@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Card, Typography, Spin, Empty } from 'antd';
+import { Button, Card, Typography, Spin, Empty, message } from 'antd';
 import { ArrowLeftOutlined, CalendarOutlined } from '@ant-design/icons';
 import { useAppStore } from '../../store';
 import type { Staff, Clinic } from '../../types';
@@ -33,7 +33,7 @@ export const DoctorDetailPage: React.FC = () => {
 
             const doctorId = Number(id);
 
-            const staffResponse = await apiRequest<Staff[]>(`/api/staffs`); //ok
+            const staffResponse = await apiRequest<Staff[]>('/api/staffs');
             const foundDoctor = staffResponse.find(s => s.id === doctorId);
 
             if (!foundDoctor) {
@@ -48,6 +48,7 @@ export const DoctorDetailPage: React.FC = () => {
 
         } catch (e) {
             console.error('Failed to load doctor data', e);
+            message.error('Ошибка загрузки данных врача');
             navigate('/');
         } finally {
             setLoading(false);
@@ -97,13 +98,15 @@ export const DoctorDetailPage: React.FC = () => {
                     </div>
                 </div>
 
-                <div className={styles.info}>
-                    <Text strong>Опыт:</Text> <Text>{doctor.experienceYears} лет</Text>
-                </div>
-
                 {clinic && (
                     <div className={styles.clinicInfo}>
                         <Text strong>Поликлиника:</Text> <Text>{clinic.name}</Text>
+                    </div>
+                )}
+
+                {doctor.cabinet && (
+                    <div className={styles.cabinetInfo}>
+                        <Text strong>Кабинет:</Text> <Text>{doctor.cabinet.number} - {doctor.cabinet.description}</Text>
                     </div>
                 )}
 
