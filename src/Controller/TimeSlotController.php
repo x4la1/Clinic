@@ -16,7 +16,7 @@ class TimeSlotController extends AbstractController
     {
         try {
             $timeSlots = $timeSlotService->getAllTimeSlots();
-            return new JsonResponse(['timeslots' => $timeSlots], Response::HTTP_OK);
+            return new JsonResponse(['time_slots' => $timeSlots], Response::HTTP_OK);
         } catch (\Exception $exception) {
             return new JsonResponse(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
         }
@@ -27,7 +27,7 @@ class TimeSlotController extends AbstractController
     {
         try{
             $slots = $timeSlotService->getFreeTimeSlotByStaffId($id, $date);
-            return new JsonResponse(['timeslots' => $slots], Response::HTTP_OK);
+            return new JsonResponse(['time_slots' => $slots], Response::HTTP_OK);
         }catch (\Exception $e){
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }

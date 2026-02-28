@@ -51,13 +51,22 @@ class ReviewController extends AbstractController
     #[Route('/reviews/all', name: 'review_all', methods: ['GET'])]
     public function getAllReviews(ReviewService $reviewService, Request $request): JsonResponse
     {
-        try{
+        try {
             $reviews = $reviewService->getAllReviews();
             return new JsonResponse(['reviews' => $reviews], Response::HTTP_OK);
-        }catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
 
+    }
+
+    private function validateReview(array $data): bool
+    {
+        $description = $data['description'] ?? null;
+        if (empty(trim($description))) {
+            return false;
+        }
+
+        return true;
     }
 }

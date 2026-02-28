@@ -30,7 +30,16 @@ class TimeSlotService
     {
         $newDate = new \DateTime($date);
         $timeSlots = $this->timeSlotRepository->getFreeTimeSlotForStuff($staffId, $newDate);
+        $result = [];
+        foreach ($timeSlots as $timeSlot) {
+            $result[] = [
+                'id' => $timeSlot['id'],
+                'staffId' => (string)$staffId,
+                'slot' => $timeSlot['slot'],
+            ];
+        }
 
-        return $timeSlots;
+
+        return $result;
     }
 }

@@ -66,10 +66,10 @@ export const AdminDashboardPage: React.FC = () => {
   const loadAllData = async () => {
     try {
       setLoading(true);
-      
+
       const statusesResponse = await apiRequest<{ statuses: { id: number; name: string }[] }>('/api/statuses');
       setStatuses(statusesResponse.statuses || []);
-      
+
       const timeSlotsResponse = await apiRequest<{ time_slots: TimeSlot[] }>('/api/timeslots/all');
       setTimeSlots(timeSlotsResponse.time_slots);
 
@@ -132,7 +132,7 @@ export const AdminDashboardPage: React.FC = () => {
 
   const openEditAppointmentModal = (appointment: Appointment) => {
     setCurrentAppointment(appointment);
-    editAppointmentForm.setFieldsValue({ 
+    editAppointmentForm.setFieldsValue({
       statusId: appointment.status.id,
       result: appointment.result || ''
     });
@@ -339,8 +339,8 @@ export const AdminDashboardPage: React.FC = () => {
         try {
           await apiRequest('/api/appointment/status/update', {
             method: 'POST',
-            body: JSON.stringify({ 
-              id: record.id, 
+            body: JSON.stringify({
+              id: record.id,
               status_id: 3 // CANCELED
             }),
           });
@@ -453,7 +453,7 @@ export const AdminDashboardPage: React.FC = () => {
     switch (statusName) {
       case 'SCHEDULED': return 'Запланировано';
       case 'COMPLETED': return 'Завершено';
-      case 'CANCELED': return 'Отменено';
+      case 'CANCELLED': return 'Отменено';
       default: return statusName;
     }
   };
@@ -530,7 +530,7 @@ export const AdminDashboardPage: React.FC = () => {
         switch (record.status.name) {
           case 'SCHEDULED': color = 'blue'; text = 'Запланировано'; break;
           case 'COMPLETED': color = 'green'; text = 'Завершено'; break;
-          case 'CANCELED': color = 'red'; text = 'Отменено'; break;
+          case 'CANCELLED': color = 'red'; text = 'Отменено'; break;
         }
         return <Tag color={color}>{text}</Tag>;
       }
@@ -613,7 +613,7 @@ export const AdminDashboardPage: React.FC = () => {
                 cabinetId: record.cabinet?.id || undefined,
                 specializations: record.specializations?.map(s => s.id) || [],
                 services: record.services?.map(s => s.id) || [],
-                timeSlots: [] 
+                timeSlots: []
               });
               setIsStaffModalOpen(true);
             }}
@@ -949,7 +949,7 @@ export const AdminDashboardPage: React.FC = () => {
           }
         ]}
       />
-      
+
       <Modal
         title="Добавить поликлинику"
         open={isClinicModalOpen}
@@ -1001,9 +1001,9 @@ export const AdminDashboardPage: React.FC = () => {
           <Form.Item name="patronymic" label="Отчество">
             <Input placeholder="Иванович" />
           </Form.Item>
-          
+
           <Form.Item name="clinicId" label="Поликлиника" rules={[{ required: true }]}>
-            <Select 
+            <Select
               placeholder="Выберите поликлинику"
               onChange={() => {
                 staffForm.setFieldsValue({ cabinetId: undefined });
@@ -1016,12 +1016,12 @@ export const AdminDashboardPage: React.FC = () => {
               ))}
             </Select>
           </Form.Item>
-          
+
           <Form.Item noStyle shouldUpdate={(prev, current) => prev.clinicId !== current.clinicId}>
             {({ getFieldValue }) => {
               const clinicId = getFieldValue('clinicId');
               const clinicCabinets = cabinets.filter(c => c.clinicId === clinicId);
-              
+
               return clinicId ? (
                 <Form.Item name="cabinetId" label="Кабинет">
                   <Select placeholder="Выберите кабинет">
@@ -1050,7 +1050,7 @@ export const AdminDashboardPage: React.FC = () => {
               ))}
             </Select>
           </Form.Item>
-          
+
           <Form.Item name="timeSlots" label="Временные слоты">
             <Select mode="multiple" placeholder="Выберите временные слоты">
               {timeSlots.map(slot => (
@@ -1060,7 +1060,7 @@ export const AdminDashboardPage: React.FC = () => {
               ))}
             </Select>
           </Form.Item>
-          
+
           <Form.Item name="phone" label="Телефон" rules={[{ required: true }]}>
             <Input placeholder="+7 (999) 123-45-67" />
           </Form.Item>
@@ -1126,11 +1126,11 @@ export const AdminDashboardPage: React.FC = () => {
               ))}
             </Select>
           </Form.Item>
-          
+
           <Form.Item name="result" label="Результат приёма">
             <Input.TextArea rows={4} placeholder="Введите результат приёма..." />
           </Form.Item>
-          
+
           <Form.Item>
             <Button type="primary" htmlType="submit" block>
               Сохранить изменения
@@ -1138,7 +1138,7 @@ export const AdminDashboardPage: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
-      
+
       <Modal
         title="Добавить услугу"
         open={isServiceModalOpen}
@@ -1159,7 +1159,7 @@ export const AdminDashboardPage: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
-      
+
       <Modal
         title="Добавить специализацию"
         open={isSpecializationModalOpen}

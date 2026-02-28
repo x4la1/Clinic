@@ -41,6 +41,7 @@ class StaffRepository extends ServiceEntityRepository
                         clinic.address as clinic_address,
                         clinic.phone as clinic_phone,
                         cabinet.number as cabinet_number,
+                        cabinet.description as cabinet_description,
 
                         GROUP_CONCAT(DISTINCT CONCAT(specialization.id, '||', specialization.name)) as specializations,
                         GROUP_CONCAT(DISTINCT CONCAT(service.id, '||', service.name)) as services,
@@ -100,8 +101,6 @@ class StaffRepository extends ServiceEntityRepository
                 'lastname' => $row['last_name'],
                 'patronymic' => $row['patronymic'],
                 'phone' => $row['phone'],
-                'experience' => $row['experience'],
-                'experienceYears' => $this->calculateExperienceYears(new \DateTime($row['experience'])),
 
                 'clinic' => [
                     'id' => $row['clinic_id'],
@@ -113,7 +112,7 @@ class StaffRepository extends ServiceEntityRepository
                 'cabinet' => $row['cabinet_id'] ? [
                     'id' => $row['cabinet_id'],
                     'number' => $row['cabinet_number'],
-                    'description' => $row['cabinet_description']
+                    'description' => $row['cabinet_description'],
                 ] : null,
 
                 'specializations' => $specializations,
@@ -191,8 +190,6 @@ class StaffRepository extends ServiceEntityRepository
             'last_name' => $row['last_name'],
             'patronymic' => $row['patronymic'],
             'phone' => $row['phone'],
-            'experience' => $row['experience'],
-            'experience_years' => $this->calculateExperienceYears(new \DateTime($row['experience'])),
 
             'clinic' => [
                 'id' => $row['clinic_id'],
@@ -216,29 +213,31 @@ class StaffRepository extends ServiceEntityRepository
 
     public function updateStaffSpecialisation(string $staffId, array $newSpecialisationIds): void
     {
-        $staff = $this->findStaffById($staffId);
+        $staff = $this->find($staffId);
         if (!$staff) {
             throw new BadRequestException('STAFF_NOT_FOUND');
         }
 
-        $conn = $this->getEntityManager()->getConnection();
-        $conn->executeStatement(
-            "DELETE FROM staff_specialization WHERE staff_id = :staffId",
-            ['staffId' => $staffId]
-        );
+        $em = $this->getEntityManager();
+
+        $em->createQueryBuilder()
+            ->delete(StaffSpecialization::class, 'ss')
+            ->where('ss.staff = :staff')
+            ->setParameter('staff', $staff)
+            ->getQuery()
+            ->execute();
 
         foreach ($newSpecialisationIds as $specialisationId) {
-            $specialization = $this->getEntityManager()->getRepository(Specialization::class)->find($specialisationId);
+            $specialization = $em->getRepository(Specialization::class)->find($specialisationId);
             if ($specialization) {
                 $staffSpecialization = new StaffSpecialization();
                 $staffSpecialization->setStaff($staff);
                 $staffSpecialization->setSpecialization($specialization);
-
-                $this->getEntityManager()->persist($staffSpecialization);
+                $em->persist($staffSpecialization);
             }
         }
 
-        $this->getEntityManager()->flush();
+        $em->flush();
     }
 
     private function findStaffById(string $id): ?Staff

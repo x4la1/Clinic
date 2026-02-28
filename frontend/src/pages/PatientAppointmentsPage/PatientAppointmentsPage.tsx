@@ -105,7 +105,7 @@ export const PatientAppointmentsPage: React.FC = () => {
         color = 'green';
         text = 'Завершено';
         break;
-      case 'CANCELED':
+      case 'CANCELLED':
         color = 'red';
         text = 'Отменено';
         break;

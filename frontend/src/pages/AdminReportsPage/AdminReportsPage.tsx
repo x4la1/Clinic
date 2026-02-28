@@ -55,7 +55,7 @@ export const AdminReportsPage: React.FC = () => {
   const totalAppointments = appointments.length;
 
   const completedAppointments = appointments.filter(a => a.status.name === 'COMPLETED').length;
-  const cancelledAppointments = appointments.filter(a => a.status.name === 'CANCELED').length;
+  const cancelledAppointments = appointments.filter(a => a.status.name === 'CANCELLED').length;
   const scheduledAppointments = appointments.filter(a => a.status.name === 'SCHEDULED').length;
 
   if (loading) {

@@ -21,6 +21,7 @@ export const apiRequest = async <T>(
     });
 
     if (!response.ok) {
+      console.log(response.json())
       let errorMessage = 'Ошибка сервера';
 
       if (response.status === 400) {

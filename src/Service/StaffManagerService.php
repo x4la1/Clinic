@@ -41,7 +41,6 @@ class StaffManagerService
         $firstName = $data['firstname'] ?? null;
         $lastName = $data['lastname'] ?? null;
         $patronymic = $data['patronymic'] ?? null;
-        $experience = $data['experience'] ?? null;
         $phone = $data['phone'] ?? null;
         $cabinetId = $data['cabinet_id'] ?? null;
 
@@ -66,22 +65,13 @@ class StaffManagerService
             }
         }
 
-        try {
-            $experienceDate = new \DateTime($experience);
-            if ($experienceDate > new \DateTime()) {
-                throw new BadRequestHttpException('EXPERIENCE_DATE_CANNOT_BE_IN_FUTURE');
-            }
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException('INVALID_EXPERIENCE_DATE_FORMAT');
-        }
-
         $staff = new Staff();
         $staff->setClinic($clinic)
             ->setCabinet($cabinet)
             ->setFirstName($firstName)
             ->setLastName($lastName)
             ->setPatronymic($patronymic)
-            ->setExperience($experienceDate)
+            ->setExperience(new \DateTime())
             ->setPhone($phone);
 
         $this->staffRepository->save($staff);
@@ -97,7 +87,6 @@ class StaffManagerService
         $firstName = $data['firstname'] ?? null;
         $lastName = $data['lastname'] ?? null;
         $patronymic = $data['patronymic'] ?? null;
-        $experience = $data['experience'] ?? null;
         $phone = $data['phone'] ?? null;
 
         $staff = $this->staffRepository->find($id);
@@ -121,24 +110,24 @@ class StaffManagerService
         $cabinet = null;
         if ($cabinetId) {
             $cabinet = $this->cabinetRepository->find($cabinetId);
+            $staffWithCurrentCabinet = $this->staffRepository->findOneBy(['cabinet' => $cabinet]);
             if (!$cabinet) {
                 throw new BadRequestHttpException('CABINET_NOT_FOUND');
             }
 
-            if (!$cabinet->getStaff()->isEmpty()) {
+            if ($staffWithCurrentCabinet !== $staff) {
                 throw new BadRequestHttpException('CABINET_ALREADY_OCCUPIED');
             }
         }
 
-        try {
-            $experienceDate = new \DateTime($experience);
-            if ($experienceDate > new \DateTime()) {
-                throw new BadRequestHttpException('EXPERIENCE_DATE_CANNOT_BE_IN_FUTURE');
-            }
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException('INVALID_EXPERIENCE_DATE_FORMAT');
-        }
+        $staff->setFirstName($firstName)
+            ->setLastName($lastName)
+            ->setPatronymic($patronymic)
+            ->setPhone($phone)
+            ->setCabinet($cabinet)
+            ->setClinic($clinic);
 
+        $this->staffRepository->save($staff);
     }
 
     public function getFullInfoStaffById(string $id): array

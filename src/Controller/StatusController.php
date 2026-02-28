@@ -12,9 +12,9 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class StatusController extends AbstractController
 {
-    public function __construct(StatusRepository $statusRepository)
+
+    public function __construct()
     {
-        $this->statusRepository = $statusRepository;
     }
 
     #[Route('/statuses', name: 'show_statuses', methods: ['GET'])]
@@ -22,7 +22,7 @@ class StatusController extends AbstractController
     {
         try {
             $statuses = $statusService->getAllStatus();
-            return new JsonResponse($statuses, Response::HTTP_OK);
+            return new JsonResponse(['statuses' => $statuses], Response::HTTP_OK);
         } catch (\Exception $exception) {
             return new JsonResponse($exception->getMessage(), Response::HTTP_BAD_REQUEST);
         }

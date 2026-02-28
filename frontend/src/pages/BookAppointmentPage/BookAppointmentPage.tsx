@@ -90,6 +90,7 @@ export const BookAppointmentPage: React.FC = () => {
       const response = await apiRequest<{ time_slots: TimeSlot[] }>(
         `/api/staff/timeslots/${staffId}/${formattedDate}`
       );
+      console.log(response.time_slots );
       setAvailableTimeSlots(response.time_slots || []);
     } catch (e) {
       console.error('Failed to load available time slots', e);

@@ -43,7 +43,7 @@ class ReviewService
 
     public function createReview(array $data): void
     {
-        $userId = $data['id'] ?? null;
+        $userId = $data['user_id'] ?? null;
         $clinicId = $data['clinic_id'] ?? null;
         $description = $data['description'] ?? null;
 

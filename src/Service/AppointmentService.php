@@ -116,8 +116,16 @@ class AppointmentService
             $result[] = [
                 'id' => $appointment->getId(),
                 'user_id' => $appointment->getUser()->getId(),
-                'staff_id' => $appointment->getStaff()->getId(),
-                'status_id' => $appointment->getStatus()->getId(),
+                'staff' => [
+                    'id' => $appointment->getStaff()->getId(),
+                    'firstName' => $appointment->getStaff()->getFirstName(),
+                    'lastName' => $appointment->getStaff()->getLastName(),
+                    'patronymic' => $appointment->getStaff()->getPatronymic(),
+                ],
+                'status' =>[
+                    'id' => $appointment->getStatus()->getId(),
+                    'name' => $appointment->getStatus()->getName(),
+                ],
                 'date' => $appointment->getDate()->format('Y-m-d H:i'),
                 'result' => $appointment->getResult(),
             ];
@@ -135,7 +143,10 @@ class AppointmentService
                 'id' => $appointment->getId(),
                 'date' => $appointment->getDate()->format('Y-m-d H:i'),
                 'result' => $appointment->getResult(),
-                'status' => $appointment->getStatus(),
+                'status' => [
+                    'id' => $appointment->getStatus()->getId(),
+                    'name' => $appointment->getStatus()->getName(),
+                ],
                 'staff' => [
                     'id' => $appointment->getStaff()->getId(),
                     'firstName' => $appointment->getStaff()->getFirstName(),

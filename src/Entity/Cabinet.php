@@ -20,7 +20,7 @@ class Cabinet
     private ?string $description = null;
 
     #[ORM\ManyToOne(targetEntity: Clinic::class)]
-    #[ORM\JoinColumn(name: 'clinic_id', nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'clinic_id', nullable: false, onDelete: 'CASCADE')]
     private Clinic|null $clinic = null;
     public function getId(): ?int
     {

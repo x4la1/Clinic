@@ -19,7 +19,7 @@ class StaffService
     private Staff|null $staff = null;
 
     #[ORM\ManyToOne(targetEntity: Service::class)]
-    #[ORM\JoinColumn(name: 'service_id', nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'service_id', nullable: false, onDelete: 'CASCADE')]
     private Service|null $service = null;
 
     public function getStaff(): ?Staff

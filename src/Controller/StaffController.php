@@ -23,8 +23,8 @@ class StaffController extends AbstractController
         }
 
         try {
-            $staffService->createStaff($data);
-            return new JsonResponse(null, Response::HTTP_CREATED);
+            $staff = $staffService->createStaff($data);
+            return new JsonResponse(['id' => $staff->getId()], Response::HTTP_CREATED);
         } catch (\Exception $exception) {
             return new JsonResponse(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
         }
@@ -45,7 +45,6 @@ class StaffController extends AbstractController
         } catch (\Exception $exception) {
             return new JsonResponse(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
         }
-
     }
 
     #[Route('/staff/delete', name: 'staff_delete', methods: ['POST'])]
@@ -108,7 +107,7 @@ class StaffController extends AbstractController
         }
     }
 
-    #[Route('/staff/specialization/update', name: 'specialization_update', methods: ['POST'])]
+    #[Route('/staff/specializations/update', name: 'specializations_update', methods: ['POST'])]
     public function updateSpecialisationToStaff(StaffManagerService $staffService, Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -119,8 +118,10 @@ class StaffController extends AbstractController
             return new JsonResponse(['error' => "INVALID_DATA"], Response::HTTP_BAD_REQUEST);
         }
 
+        $specializationIds = array_column($specializations, 'specialization_id');
+
         try {
-            $staffService->updateSpecialisationInStaff($id, $specializations);
+            $staffService->updateSpecialisationInStaff($id, $specializationIds);
             return new JsonResponse(null, Response::HTTP_OK);
         } catch (\Exception $exception) {
             return new JsonResponse(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
@@ -167,10 +168,9 @@ class StaffController extends AbstractController
         $clinicId = $data['clinic_id'] ?? null;
         $firstName = $data['firstname'] ?? null;
         $lastName = $data['lastname'] ?? null;
-        $experience = $data['experience'] ?? null;
         $phone = $data['phone'] ?? null;
 
-        if (empty(trim($clinicId)) || empty(trim($firstName)) || empty(trim($lastName)) || empty(trim($experience)) || empty(trim($phone))) {
+        if (empty(trim($clinicId)) || empty(trim($firstName)) || empty(trim($lastName)) || empty(trim($phone))) {
             return false;
         }
 
