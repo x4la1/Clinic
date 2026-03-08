@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Button, Card, Typography, Row, Col, Spin, message } from 'antd';
-import { UserOutlined, CalendarOutlined, HistoryOutlined, LogoutOutlined, MailOutlined, PhoneOutlined, BellOutlined } from '@ant-design/icons';
+import { UserOutlined, CalendarOutlined, HistoryOutlined, LogoutOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store';
 import styles from './PatientDashboardPage.module.scss';
@@ -63,17 +63,6 @@ export const PatientDashboardPage: React.FC = () => {
                                     <div>
                                         <Title level={5} className={styles.cardTitle}>Мои записи</Title>
                                         <Text>Просмотр текущих и прошедших записей</Text>
-                                    </div>
-                                </Link>
-                            </Card>
-                        </Col>
-                        <Col xs={24} sm={12}>
-                            <Card className={styles.actionCard} hoverable>
-                                <Link to="/patient/notifications" className={styles.cardLink}>
-                                    <BellOutlined className={styles.cardIcon} />
-                                    <div>
-                                        <Title level={5} className={styles.cardTitle}>Уведомления</Title>
-                                        <Text>О предстоящих приёмах</Text>
                                     </div>
                                 </Link>
                             </Card>

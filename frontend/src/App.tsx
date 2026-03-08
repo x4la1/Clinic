@@ -11,7 +11,6 @@ import { PatientAppointmentsPage } from './pages/PatientAppointmentsPage/Patient
 import { ClinicDetailPage } from './pages/ClinicDetailPage/ClinicDetailPage';
 import { DoctorDetailPage } from './pages/DoctorDetailPage/DoctorDetailPage';
 import { DoctorsSearchPage } from './pages/DoctorsSearchPage/DoctorsSearchPage';
-import { PatientNotificationsPage } from './pages/PatientNotificationsPage/PatientNotificationsPage';
 import { AdminReportsPage } from './pages/AdminReportsPage/AdminReportsPage';
 import { AdminReviewsPage } from './pages/AdminReviewsPage/AdminReviewsPage';
 import { useEffect } from 'react';
@@ -41,7 +40,6 @@ function App() {
           <Route path="/clinics/:id" element={<ClinicDetailPage />} />
           <Route path="/doctors/:id" element={<DoctorDetailPage />} />
           <Route path="/doctors" element={<DoctorsSearchPage />} />
-          <Route path="/patient/notifications" element={<PatientNotificationsPage />} />
           <Route path="/admin/reports" element={<AdminReportsPage />} />
           <Route path="/admin/reviews" element={<AdminReviewsPage />} />
         </Routes>

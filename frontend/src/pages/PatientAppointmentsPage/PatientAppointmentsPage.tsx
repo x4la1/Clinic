@@ -152,7 +152,7 @@ export const PatientAppointmentsPage: React.FC = () => {
       key: 'actions',
       render: (_: any, record: Appointment) => (
         <>
-          {record.status?.name !== 'CANCELED' && (
+          {record.status?.name === 'SCHEDULED' && (
             <Button
               type="link"
               danger

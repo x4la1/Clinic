@@ -25,8 +25,6 @@ export const AdminDashboardPage: React.FC = () => {
   const [staffForm] = Form.useForm();
 
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
-  const [isTimeSlotModalOpen, setIsTimeSlotModalOpen] = useState(false);
-  const [timeSlotForm] = Form.useForm();
 
   const [users, setUsers] = useState<User[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -540,7 +538,7 @@ export const AdminDashboardPage: React.FC = () => {
       key: 'actions',
       render: (_: any, record: Appointment) => (
         <>
-          {record.status.name !== 'CANCELED' && (
+          {record.status.name !== 'SCHEDULED' && (
             <Button
               type="link"
               danger
@@ -550,7 +548,6 @@ export const AdminDashboardPage: React.FC = () => {
               Отменить
             </Button>
           )}
-          {/* КНОПКА РЕДАКТИРОВАНИЯ */}
           <Button
             type="link"
             onClick={() => openEditAppointmentModal(record)}
@@ -631,14 +628,6 @@ export const AdminDashboardPage: React.FC = () => {
         </>
       ),
     },
-  ];
-
-  const timeSlotColumns = [
-    {
-      title: 'Время',
-      dataIndex: 'slot',
-      key: 'slot',
-    }
   ];
 
   const cabinetColumns = [
@@ -849,22 +838,6 @@ export const AdminDashboardPage: React.FC = () => {
                   columns={staffColumns}
                   rowKey="id"
                   pagination={{ pageSize: 5 }}
-                />
-              </Card>
-            ),
-          },
-          {
-            key: '5',
-            label: 'Временные слоты',
-            children: (
-              <Card
-                title="Все доступные временные слоты"
-              >
-                <Table
-                  dataSource={timeSlots}
-                  columns={timeSlotColumns}
-                  rowKey="id"
-                  pagination={{ pageSize: 20 }}
                 />
               </Card>
             ),
